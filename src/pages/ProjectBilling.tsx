@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, FileText, Calculator, Settings, CreditCard } from "lucide-react";
+import { Plus, FileText, Calculator, Settings, CreditCard, Calendar } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useSearchParams } from "react-router-dom";
@@ -12,6 +11,9 @@ import PaymentTracking from "@/features/billing/components/PaymentTracking";
 import InvoiceGeneration from "@/features/billing/components/InvoiceGeneration";
 import AddProjectForm from "@/features/billing/components/AddProjectForm";
 import DepartmentSettings from "@/features/billing/components/DepartmentSettings";
+import { GanttChart } from "@/features/billing/components/GanttChart";
+import { EnhancedAddProjectForm } from "@/features/billing/components/EnhancedAddProjectForm";
+import { BillingProject } from "@/features/billing/types/billingTypes";
 
 const ProjectBilling = () => {
   const [searchParams] = useSearchParams();
@@ -19,6 +21,8 @@ const ProjectBilling = () => {
   const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
   const [isDepartmentSettingsOpen, setIsDepartmentSettingsOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [selectedProject, setSelectedProject] = useState<BillingProject | null>(null);
+  const [isGanttDialogOpen, setIsGanttDialogOpen] = useState(false);
 
   // Handle URL parameters for navigation from Dashboard
   useEffect(() => {
@@ -35,7 +39,7 @@ const ProjectBilling = () => {
     }
   }, [searchParams]);
 
-  const handleAddProjectSuccess = () => {
+  const handleAddProjectSuccess = (project: BillingProject) => {
     setIsProjectDialogOpen(false);
     setRefreshTrigger(prev => prev + 1);
     toast.success("Project added successfully!");
@@ -44,6 +48,11 @@ const ProjectBilling = () => {
   const handleDepartmentUpdate = () => {
     setRefreshTrigger(prev => prev + 1);
     toast.success("Departments updated successfully!");
+  };
+
+  const handleShowGantt = (project: BillingProject) => {
+    setSelectedProject(project);
+    setIsGanttDialogOpen(true);
   };
 
   return (
@@ -66,10 +75,14 @@ const ProjectBilling = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="projects" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             Projects
+          </TabsTrigger>
+          <TabsTrigger value="gantt" className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            Gantt Chart
           </TabsTrigger>
           <TabsTrigger value="payments" className="flex items-center gap-2">
             <CreditCard className="h-4 w-4" />
@@ -92,7 +105,26 @@ const ProjectBilling = () => {
               <CardDescription>Manage billing projects with department involvement, individual budgets, and work planning</CardDescription>
             </CardHeader>
             <CardContent>
-              <ProjectManagement refreshTrigger={refreshTrigger} />
+              <ProjectManagement refreshTrigger={refreshTrigger} onShowGantt={handleShowGantt} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="gantt" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Gantt Chart View</CardTitle>
+              <CardDescription>Visual project timeline and task management</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {selectedProject ? (
+                <GanttChart project={selectedProject} />
+              ) : (
+                <div className="text-center py-8">
+                  <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">Select a project from the Projects tab to view its Gantt chart</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -138,11 +170,22 @@ const ProjectBilling = () => {
       </Tabs>
 
       <Dialog open={isProjectDialogOpen} onOpenChange={setIsProjectDialogOpen}>
-        <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[1200px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Add New Project</DialogTitle>
+            <DialogTitle>Add New Project with Gantt Planning</DialogTitle>
           </DialogHeader>
-          <AddProjectForm onSuccess={handleAddProjectSuccess} />
+          <EnhancedAddProjectForm onSuccess={handleAddProjectSuccess} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isGanttDialogOpen} onOpenChange={setIsGanttDialogOpen}>
+        <DialogContent className="sm:max-w-[95vw] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Gantt Chart: {selectedProject?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedProject && <GanttChart project={selectedProject} />}
         </DialogContent>
       </Dialog>
 
