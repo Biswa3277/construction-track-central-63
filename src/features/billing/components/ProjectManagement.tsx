@@ -1,19 +1,19 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Eye, Edit, Trash2, Calendar } from "lucide-react";
+import { Eye, Edit, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BillingProject } from "../types/billingTypes";
 
 interface ProjectManagementProps {
   refreshTrigger: number;
-  onShowGantt?: (project: BillingProject) => void;
 }
 
-const ProjectManagement = ({ refreshTrigger, onShowGantt }: ProjectManagementProps) => {
+const ProjectManagement = ({ refreshTrigger }: ProjectManagementProps) => {
   const [projects, setProjects] = useState<BillingProject[]>([]);
   const [selectedProject, setSelectedProject] = useState<BillingProject | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
@@ -73,14 +73,13 @@ const ProjectManagement = ({ refreshTrigger, onShowGantt }: ProjectManagementPro
               <TableHead>Pending</TableHead>
               <TableHead>Progress</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Tasks</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {projects.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                   No projects found. Add your first project to get started.
                 </TableCell>
               </TableRow>
@@ -100,16 +99,6 @@ const ProjectManagement = ({ refreshTrigger, onShowGantt }: ProjectManagementPro
                   </TableCell>
                   <TableCell>{getStatusBadge(project.status)}</TableCell>
                   <TableCell>
-                    <div className="text-sm">
-                      <div>Total: {project.ganttTasks?.length || 0}</div>
-                      {project.ganttTasks && (
-                        <div className="text-xs text-muted-foreground">
-                          Completed: {project.ganttTasks.filter(t => t.status === 'completed').length}
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
@@ -118,15 +107,6 @@ const ProjectManagement = ({ refreshTrigger, onShowGantt }: ProjectManagementPro
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      {project.ganttTasks && project.ganttTasks.length > 0 && onShowGantt && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onShowGantt(project)}
-                        >
-                          <Calendar className="h-4 w-4" />
-                        </Button>
-                      )}
                       <Button
                         variant="outline"
                         size="sm"
@@ -180,32 +160,6 @@ const ProjectManagement = ({ refreshTrigger, onShowGantt }: ProjectManagementPro
                   <p className="text-red-600">₹{selectedProject.totalPending.toLocaleString()}</p>
                 </div>
               </div>
-
-              {selectedProject.ganttTasks && selectedProject.ganttTasks.length > 0 && (
-                <div>
-                  <h4 className="font-medium mb-2">Project Tasks ({selectedProject.ganttTasks.length})</h4>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {selectedProject.ganttTasks.map((task) => (
-                      <div key={task.id} className="flex justify-between items-center p-2 bg-muted rounded">
-                        <div>
-                          <span className="font-medium">{task.name}</span>
-                          <div className="text-sm text-muted-foreground">
-                            {task.departmentName} • {task.estimatedHours}h
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant={task.status === 'completed' ? 'default' : 'secondary'}>
-                            {task.status.replace('-', ' ')}
-                          </Badge>
-                          <Badge variant={task.priority === 'critical' ? 'destructive' : 'outline'}>
-                            {task.priority}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               <div>
                 <h4 className="font-medium mb-2">Payment Terms</h4>
