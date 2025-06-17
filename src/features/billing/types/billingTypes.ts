@@ -34,6 +34,52 @@ export interface ProjectPayment {
   createdAt: string;
 }
 
+export interface GanttTask {
+  id: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  duration: number;
+  progress: number;
+  dependencies: string[];
+  departmentId: string;
+  departmentName: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  assignedTo: string;
+  estimatedHours: number;
+  actualHours: number;
+  resources: {
+    labor: number;
+    materials: number;
+    equipment: number;
+  };
+  status: 'not-started' | 'in-progress' | 'completed' | 'delayed';
+  criticalPath: boolean;
+}
+
+export interface ProjectMilestone {
+  id: string;
+  name: string;
+  date: string;
+  status: 'upcoming' | 'completed' | 'overdue';
+  description: string;
+}
+
+export interface ProjectResources {
+  totalBudget: number;
+  allocatedBudget: number;
+  labor: number;
+  materials: number;
+  equipment: number;
+}
+
+export interface RiskAssessment {
+  overall: 'low' | 'medium' | 'high';
+  technical: 'low' | 'medium' | 'high';
+  financial: 'low' | 'medium' | 'high';
+  schedule: 'low' | 'medium' | 'high';
+}
+
 export interface BillingProject {
   id: string;
   name: string;
@@ -42,7 +88,7 @@ export interface BillingProject {
   projectOwner: 'PHED' | 'PWD' | 'Contractor' | 'Company' | 'Other';
   projectOwnerDetails?: string;
   status: 'planning' | 'active' | 'completed' | 'on-hold';
-  departments: string[]; // Array of department IDs
+  departments: string[];
   paymentTerms: PaymentTerm[];
   workPlan: WorkPlanStep[];
   totalReceived: number;
@@ -51,4 +97,11 @@ export interface BillingProject {
   updatedAt: string;
   startDate?: string;
   expectedEndDate?: string;
+  ganttTasks: GanttTask[];
+  projectResources: ProjectResources;
+  bufferDays: number;
+  workingDaysPerWeek: number;
+  projectManager: string;
+  riskAssessment: RiskAssessment;
+  milestones: ProjectMilestone[];
 }

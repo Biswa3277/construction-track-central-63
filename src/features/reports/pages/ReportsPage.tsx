@@ -1,10 +1,13 @@
 
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Download } from "lucide-react";
-import { toast } from "sonner";
+import { FileText, BarChart } from "lucide-react";
+import AnalysisDashboard from "@/features/reports/components/AnalysisDashboard";
 
 const ReportsPage = () => {
+  const [selectedReport, setSelectedReport] = useState<string | null>(null);
+
   const reportTypes = [
     {
       id: "1",
@@ -44,15 +47,24 @@ const ReportsPage = () => {
     }
   ];
 
-  const handleGenerateReport = (reportId: string) => {
-    toast.success("Report generation started. It will be available for download shortly.");
+  const handleAnalysis = (reportTitle: string) => {
+    setSelectedReport(reportTitle);
   };
+
+  if (selectedReport) {
+    return (
+      <AnalysisDashboard 
+        reportType={selectedReport} 
+        onClose={() => setSelectedReport(null)} 
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Reports</h1>
-        <p className="text-muted-foreground">Generate and download various reports</p>
+        <p className="text-muted-foreground">Generate and analyze various reports</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -69,10 +81,10 @@ const ReportsPage = () => {
               <Button 
                 variant="outline" 
                 className="w-full"
-                onClick={() => handleGenerateReport(report.id)}
+                onClick={() => handleAnalysis(report.title)}
               >
-                <Download className="mr-2 h-4 w-4" />
-                Generate Report
+                <BarChart className="mr-2 h-4 w-4" />
+                Analysis
               </Button>
             </CardContent>
           </Card>
