@@ -59,23 +59,26 @@ const MainNavigation = ({ user }: MainNavigationProps) => {
       </SidebarHeader>
       <SidebarContent className="p-2">
         <div className="space-y-1">
-          {navItems.map((item) => (
-            <Link to={item.path} key={item.path}>
-              <Button
-                variant={location.pathname === item.path ? "secondary" : "ghost"}
-                className="w-full justify-start"
-              >
-                <item.icon className="mr-2 h-4 w-4" />
-                {item.label}
-              </Button>
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link to={item.path} key={item.path}>
+                <Button
+                  variant={isActive ? "secondary" : "ghost"}
+                  className={`w-full justify-start ${isActive ? "nav-item-active" : ""}`}
+                >
+                  <item.icon className="mr-2 h-4 w-4" />
+                  {item.label}
+                </Button>
+              </Link>
+            );
+          })}
           
           {isSuperAdmin && (
             <Link to="/user-management">
               <Button
                 variant={location.pathname === "/user-management" ? "secondary" : "ghost"}
-                className="w-full justify-start"
+                className={`w-full justify-start ${location.pathname === "/user-management" ? "nav-item-active" : ""}`}
               >
                 <UserPlus className="mr-2 h-4 w-4" />
                 User Management

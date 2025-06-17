@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import UISettings from "@/components/settings/UISettings";
 
 const UserSettings = () => {
   const [user, setUser] = useState({
@@ -243,11 +243,12 @@ const Settings = () => {
         <p className="text-muted-foreground">Manage your account and application settings</p>
       </div>
 
-      <Tabs defaultValue="user">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs defaultValue="user" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="user">User Profile</TabsTrigger>
           <TabsTrigger value="company">Company</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="ui">UI & Theme</TabsTrigger>
         </TabsList>
         <TabsContent value="user">
           <Card>
@@ -279,6 +280,17 @@ const Settings = () => {
             </CardHeader>
             <CardContent>
               <NotificationSettings />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="ui">
+          <Card>
+            <CardHeader>
+              <CardTitle>UI & Theme Settings</CardTitle>
+              <CardDescription>Customize the appearance and feel of your application</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <UISettings />
             </CardContent>
           </Card>
         </TabsContent>

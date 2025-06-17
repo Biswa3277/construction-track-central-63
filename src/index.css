@@ -3,6 +3,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Playfair+Display:wght@400;500;600;700&family=Lato:wght@300;400;700&family=Open+Sans:wght@300;400;600;700&family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
+
 @layer base {
   :root {
     --background: 210 40% 98%;
@@ -39,6 +42,8 @@
     --partial: 38 92% 50%;
     --unpaid: 0 84% 60%;
     --hold: 262 83% 58%;
+
+    --font-family: 'Inter', sans-serif;
   }
 
   .dark {
@@ -75,6 +80,62 @@
     --unpaid: 0 84% 60%;
     --hold: 262 83% 58%;
   }
+
+  /* Glass Effect Template */
+  .template-glass {
+    --background: 240 10% 3.9%;
+    --card: rgba(255, 255, 255, 0.1);
+    --border: rgba(255, 255, 255, 0.2);
+    --input: rgba(255, 255, 255, 0.1);
+    --muted: rgba(255, 255, 255, 0.05);
+    --primary: 261 83% 58%;
+  }
+
+  .template-glass .card,
+  .template-glass [data-sonner-toaster] {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  }
+
+  /* Minimal Template */
+  .template-minimal {
+    --primary: 0 0% 0%;
+    --secondary: 0 0% 98%;
+    --border: 0 0% 90%;
+    --card: 0 0% 100%;
+    --muted: 0 0% 96%;
+  }
+
+  /* Vibrant Template */
+  .template-vibrant {
+    --primary: 330 81% 60%;
+    --accent: 45 93% 58%;
+    --secondary: 271 91% 65%;
+    --card: 0 0% 100%;
+    --border: 330 81% 90%;
+  }
+
+  /* Nature Template */
+  .template-nature {
+    --primary: 142 76% 36%;
+    --accent: 84 81% 44%;
+    --secondary: 47 89% 61%;
+    --background: 60 9% 98%;
+    --card: 120 13% 97%;
+    --border: 142 76% 86%;
+  }
+
+  /* Ocean Template */
+  .template-ocean {
+    --primary: 188 86% 53%;
+    --accent: 186 77% 47%;
+    --secondary: 185 96% 78%;
+    --background: 185 30% 97%;
+    --card: 185 23% 95%;
+    --border: 188 86% 83%;
+  }
 }
 
 @layer base {
@@ -84,9 +145,11 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-family);
   }
 }
 
+/* Status Classes */
 .status-paid {
   @apply bg-green-100 text-green-800 border-green-300;
 }
@@ -113,4 +176,33 @@
 
 .transport-delivered {
   @apply bg-green-100 text-green-800 border-green-300;
+}
+
+/* Navigation Highlighting */
+.nav-item-active {
+  @apply bg-primary/10 text-primary border-primary/20;
+  position: relative;
+}
+
+.nav-item-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: hsl(var(--primary));
+  border-radius: 0 2px 2px 0;
+}
+
+/* Smooth transitions for theme changes */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* Glass effect animations */
+.template-glass .card:hover {
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.5);
 }
