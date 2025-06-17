@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Outlet, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import MainNavigation from "./MainNavigation";
+import Header from "@/components/layout/Header";
 import { toast } from "sonner";
 
 const MainLayout = () => {
@@ -52,11 +53,14 @@ const MainLayout = () => {
       <div className="flex h-screen w-full overflow-hidden">
         <MainNavigation user={user} />
         <div className="flex-1 overflow-auto">
-          <div className="h-16 border-b flex items-center px-6">
-            <SidebarTrigger />
-            <h2 className="text-lg font-medium ml-4">
-              {getPageTitle()}
-            </h2>
+          <div className="h-16 border-b flex items-center justify-between px-6">
+            <div className="flex items-center">
+              <SidebarTrigger />
+              <h2 className="text-lg font-medium ml-4">
+                {getPageTitle()}
+              </h2>
+            </div>
+            <Header user={user} />
           </div>
           <main className="p-6">
             <Outlet />
