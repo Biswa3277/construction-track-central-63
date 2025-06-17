@@ -7,11 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DatePicker } from "@/components/ui/date-picker";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Plus, Trash2 } from "lucide-react";
-import { Department, PaymentTerm, WorkPlanStep, BillingProject } from "../types/billingTypes";
+import { Department, PaymentTerm, WorkPlanStep, BillingProject, GanttTask, ProjectMilestone } from "../types/billingTypes";
 
 const projectSchema = z.object({
   name: z.string().min(1, "Project name is required"),
@@ -21,19 +20,23 @@ const projectSchema = z.object({
   projectOwnerDetails: z.string().optional(),
   startDate: z.string().optional(),
   expectedEndDate: z.string().optional(),
+  projectManager: z.string().min(1, "Project manager is required"),
+  bufferDays: z.number().min(0, "Buffer days must be non-negative"),
+  workingDaysPerWeek: z.number().min(1).max(7, "Working days must be between 1-7"),
 });
 
-interface AddProjectFormProps {
+interface EnhancedAddProjectFormProps {
   onSuccess: () => void;
 }
 
-const AddProjectForm = ({ onSuccess }: AddProjectFormProps) => {
+const EnhancedAddProjectForm = ({ onSuccess }: EnhancedAddProjectFormProps) => {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
   const [paymentTerms, setPaymentTerms] = useState<PaymentTerm[]>([
     { id: "1", description: "After materials supply", percentage: 60, milestone: "Materials Supply" }
   ]);
   const [workPlan, setWorkPlan] = useState<WorkPlanStep[]>([]);
+  const [milestones, setMilestones] = useState<ProjectMilestone[]>([]);
 
   const form = useForm<z.infer<typeof projectSchema>>({
     resolver: zodResolver(projectSchema),
@@ -43,6 +46,9 @@ const AddProjectForm = ({ onSuccess }: AddProjectFormProps) => {
       totalCost: 0,
       projectOwner: "PHED",
       projectOwnerDetails: "",
+      projectManager: "",
+      bufferDays: 7,
+      workingDaysPerWeek: 5,
     },
   });
 
@@ -53,7 +59,6 @@ const AddProjectForm = ({ onSuccess }: AddProjectFormProps) => {
   const loadDepartments = () => {
     const storedDepartments = JSON.parse(localStorage.getItem('billing_departments') || '[]');
     if (storedDepartments.length === 0) {
-      // Initialize with default departments
       const defaultDepartments: Department[] = [
         { id: "1", name: "Tender", isActive: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
         { id: "2", name: "Account", isActive: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
@@ -95,6 +100,99 @@ const AddProjectForm = ({ onSuccess }: AddProjectFormProps) => {
     }
   };
 
+  const generateGanttTasks = (workPlan: WorkPlanStep[], startDate: string): GanttTask[] => {
+    const tasks: GanttTask[] = [];
+    let currentDate = new Date(startDate || new Date());
+
+    workPlan.forEach((step, index) => {
+      const taskStartDate = new Date(currentDate);
+      const taskEndDate = new Date(currentDate);
+      taskEndDate.setDate(taskEndDate.getDate() + 14); // Default 14 days duration
+      
+      const task: GanttTask = {
+        id: step.id,
+        name: `${step.departmentName} Task`,
+        startDate: taskStartDate.toISOString().split('T')[0],
+        endDate: taskEndDate.toISOString().split('T')[0],
+        duration: 14,
+        progress: step.status === 'completed' ? 100 : step.status === 'in-progress' ? 50 : 0,
+        dependencies: index > 0 ? [workPlan[index - 1].id] : [],
+        departmentId: step.departmentId,
+        departmentName: step.departmentName,
+        priority: "medium",
+        assignedTo: [],
+        resources: {
+          labor: 2,
+          materials: 1000,
+          equipment: 1
+        },
+        notes: step.notes || "",
+        actualStartDate: null,
+        actualEndDate: null,
+        criticalPath: false
+      };
+      
+      tasks.push(task);
+      currentDate = new Date(taskEndDate);
+      currentDate.setDate(currentDate.getDate() + 1); // Next task starts day after previous ends
+    });
+
+    return tasks;
+  };
+
+  const onSubmit = (values: z.infer<typeof projectSchema>) => {
+    const totalPercentage = paymentTerms.reduce((sum, term) => sum + term.percentage, 0);
+    if (totalPercentage !== 100) {
+      alert("Payment terms must total 100%");
+      return;
+    }
+
+    const ganttTasks = generateGanttTasks(workPlan, values.startDate || "");
+
+    const newProject: BillingProject = {
+      id: Date.now().toString(),
+      name: values.name,
+      description: values.description,
+      totalCost: values.totalCost,
+      projectOwner: values.projectOwner,
+      projectOwnerDetails: values.projectOwnerDetails || "",
+      status: "planning",
+      departments: selectedDepartments,
+      paymentTerms,
+      workPlan,
+      totalReceived: 0,
+      totalPending: values.totalCost,  
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      startDate: values.startDate,
+      expectedEndDate: values.expectedEndDate,
+      ganttTasks,
+      projectResources: {
+        totalBudget: values.totalCost,
+        allocatedBudget: 0,
+        labor: ganttTasks.reduce((sum, task) => sum + task.resources.labor, 0),
+        materials: ganttTasks.reduce((sum, task) => sum + task.resources.materials, 0),
+        equipment: ganttTasks.reduce((sum, task) => sum + task.resources.equipment, 0)
+      },
+      bufferDays: values.bufferDays,
+      workingDaysPerWeek: values.workingDaysPerWeek,
+      projectManager: values.projectManager,
+      riskAssessment: {
+        overall: "medium",
+        technical: "medium", 
+        financial: "medium",
+        schedule: "medium"
+      },
+      milestones
+    };
+
+    const existingProjects = JSON.parse(localStorage.getItem('billing_projects') || '[]');
+    existingProjects.push(newProject);
+    localStorage.setItem('billing_projects', JSON.stringify(existingProjects));
+
+    onSuccess();
+  };
+
   const addPaymentTerm = () => {
     const newTerm: PaymentTerm = {
       id: Date.now().toString(),
@@ -121,55 +219,25 @@ const AddProjectForm = ({ onSuccess }: AddProjectFormProps) => {
     ));
   };
 
-  const onSubmit = (values: z.infer<typeof projectSchema>) => {
-    const totalPercentage = paymentTerms.reduce((sum, term) => sum + term.percentage, 0);
-    if (totalPercentage !== 100) {
-      alert("Payment terms must total 100%");
-      return;
-    }
-
-    const newProject: BillingProject = {
+  const addMilestone = () => {
+    const newMilestone: ProjectMilestone = {
       id: Date.now().toString(),
-      name: values.name,
-      description: values.description,
-      totalCost: values.totalCost,
-      projectOwner: values.projectOwner,
-      projectOwnerDetails: values.projectOwnerDetails,
-      status: "planning",
-      departments: selectedDepartments,
-      paymentTerms,
-      workPlan,
-      totalReceived: 0,
-      totalPending: values.totalCost,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      startDate: values.startDate,
-      expectedEndDate: values.expectedEndDate,
-      ganttTasks: [],
-      projectResources: {
-        totalBudget: values.totalCost,
-        allocatedBudget: 0,
-        labor: 0,
-        materials: 0,
-        equipment: 0
-      },
-      bufferDays: 7,
-      workingDaysPerWeek: 5,
-      projectManager: "",
-      riskAssessment: {
-        overall: "medium",
-        technical: "medium",
-        financial: "medium",
-        schedule: "medium"
-      },
-      milestones: []
+      name: "",
+      date: "",
+      description: "",
+      status: "pending"
     };
+    setMilestones([...milestones, newMilestone]);
+  };
 
-    const existingProjects = JSON.parse(localStorage.getItem('billing_projects') || '[]');
-    existingProjects.push(newProject);
-    localStorage.setItem('billing_projects', JSON.stringify(existingProjects));
+  const removeMilestone = (id: string) => {
+    setMilestones(milestones.filter(milestone => milestone.id !== id));
+  };
 
-    onSuccess();
+  const updateMilestone = (id: string, field: keyof ProjectMilestone, value: string) => {
+    setMilestones(milestones.map(milestone => 
+      milestone.id === id ? { ...milestone, [field]: value } : milestone
+    ));
   };
 
   return (
@@ -252,12 +320,61 @@ const AddProjectForm = ({ onSuccess }: AddProjectFormProps) => {
 
           <FormField
             control={form.control}
-            name="projectOwnerDetails"
+            name="projectManager"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Owner Details (Optional)</FormLabel>
+                <FormLabel>Project Manager</FormLabel>
                 <FormControl>
-                  <Input placeholder="Additional owner details" {...field} />
+                  <Input placeholder="Enter project manager name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <FormField
+            control={form.control}
+            name="startDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Start Date</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="expectedEndDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Expected End Date</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="bufferDays"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Buffer Days</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    placeholder="7" 
+                    {...field}
+                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -368,12 +485,62 @@ const AddProjectForm = ({ onSuccess }: AddProjectFormProps) => {
           </Card>
         )}
 
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              Project Milestones
+              <Button type="button" variant="outline" size="sm" onClick={addMilestone}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Milestone
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {milestones.map((milestone) => (
+              <div key={milestone.id} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div>
+                  <label className="text-sm font-medium">Milestone Name</label>
+                  <Input
+                    placeholder="Milestone name"
+                    value={milestone.name}
+                    onChange={(e) => updateMilestone(milestone.id, 'name', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Date</label>
+                  <Input
+                    type="date"
+                    value={milestone.date}
+                    onChange={(e) => updateMilestone(milestone.id, 'date', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Description</label>
+                  <Input
+                    placeholder="Description"
+                    value={milestone.description}
+                    onChange={(e) => updateMilestone(milestone.id, 'description', e.target.value)}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => removeMilestone(milestone.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
         <div className="flex justify-end gap-2">
-          <Button type="submit">Create Project</Button>
+          <Button type="submit">Create Enhanced Project</Button>
         </div>
       </form>
     </Form>
   );
 };
 
-export default AddProjectForm;
+export default EnhancedAddProjectForm;
