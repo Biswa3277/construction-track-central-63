@@ -1,6 +1,5 @@
-
-import { useState } from "react";
-import { Search, Bell, Mail, User, Settings, LogOut } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Bell, Mail, User, Settings, LogOut, Moon, Sun } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,7 +26,31 @@ interface HeaderProps {
 
 const Header = ({ user }: HeaderProps) => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Load saved dark mode preference
+    const savedDarkMode = localStorage.getItem("darkMode") === "true";
+    setIsDarkMode(savedDarkMode);
+    applyTheme(savedDarkMode);
+  }, []);
+
+  const applyTheme = (isDark: boolean) => {
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  };
+
+  const handleDarkModeToggle = () => {
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    localStorage.setItem("darkMode", newDarkMode.toString());
+    applyTheme(newDarkMode);
+    toast.success(`${newDarkMode ? "Dark" : "Light"} mode enabled`);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -62,6 +85,17 @@ const Header = ({ user }: HeaderProps) => {
           className="pl-10"
         />
       </div>
+
+      {/* Dark Mode Toggle */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={handleDarkModeToggle}
+        className="relative"
+        title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+      >
+        {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+      </Button>
 
       {/* Notifications */}
       <Popover>
