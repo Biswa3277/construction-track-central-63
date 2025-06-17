@@ -120,15 +120,15 @@ const EnhancedAddProjectForm = ({ onSuccess }: EnhancedAddProjectFormProps) => {
         departmentId: step.departmentId,
         departmentName: step.departmentName,
         priority: "medium",
-        assignedTo: [],
+        assignedTo: "Project Team", // Fixed: Changed from empty array to string
+        estimatedHours: 112, // 14 days * 8 hours
+        actualHours: 0,
         resources: {
           labor: 2,
           materials: 1000,
           equipment: 1
         },
-        notes: step.notes || "",
-        actualStartDate: null,
-        actualEndDate: null,
+        status: "not-started",
         criticalPath: false
       };
       
@@ -225,7 +225,7 @@ const EnhancedAddProjectForm = ({ onSuccess }: EnhancedAddProjectFormProps) => {
       name: "",
       date: "",
       description: "",
-      status: "pending"
+      status: "upcoming" // Fixed: Changed from "pending" to "upcoming"
     };
     setMilestones([...milestones, newMilestone]);
   };
