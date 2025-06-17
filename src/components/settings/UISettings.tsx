@@ -15,14 +15,22 @@ const UISettings = () => {
   const [selectedTemplate, setSelectedTemplate] = useState("default");
 
   const fontOptions = [
-    { value: "inter", label: "Inter", family: "Inter, sans-serif" },
-    { value: "roboto", label: "Roboto", family: "Roboto, sans-serif" },
-    { value: "playfair", label: "Playfair Display", family: "Playfair Display, serif" },
-    { value: "lato", label: "Lato", family: "Lato, sans-serif" },
-    { value: "opensans", label: "Open Sans", family: "Open Sans, sans-serif" },
-    { value: "montserrat", label: "Montserrat", family: "Montserrat, sans-serif" },
-    { value: "poppins", label: "Poppins", family: "Poppins, sans-serif" },
-    { value: "sourcesans", label: "Source Sans Pro", family: "Source Sans Pro, sans-serif" },
+    { value: "inter", label: "Inter", family: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" },
+    { value: "roboto", label: "Roboto", family: "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif" },
+    { value: "playfair", label: "Playfair Display", family: "'Playfair Display', Georgia, serif" },
+    { value: "lato", label: "Lato", family: "'Lato', -apple-system, BlinkMacSystemFont, sans-serif" },
+    { value: "opensans", label: "Open Sans", family: "'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif" },
+    { value: "montserrat", label: "Montserrat", family: "'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif" },
+    { value: "poppins", label: "Poppins", family: "'Poppins', -apple-system, BlinkMacSystemFont, sans-serif" },
+    { value: "sourcesans", label: "Source Sans Pro", family: "'Source Sans Pro', -apple-system, BlinkMacSystemFont, sans-serif" },
+    { value: "nunito", label: "Nunito", family: "'Nunito', -apple-system, BlinkMacSystemFont, sans-serif" },
+    { value: "worksans", label: "Work Sans", family: "'Work Sans', -apple-system, BlinkMacSystemFont, sans-serif" },
+    { value: "fira", label: "Fira Sans", family: "'Fira Sans', -apple-system, BlinkMacSystemFont, sans-serif" },
+    { value: "ubuntu", label: "Ubuntu", family: "'Ubuntu', -apple-system, BlinkMacSystemFont, sans-serif" },
+    { value: "raleway", label: "Raleway", family: "'Raleway', -apple-system, BlinkMacSystemFont, sans-serif" },
+    { value: "merriweather", label: "Merriweather", family: "'Merriweather', Georgia, serif" },
+    { value: "oswald", label: "Oswald", family: "'Oswald', -apple-system, BlinkMacSystemFont, sans-serif" },
+    { value: "dmsans", label: "DM Sans", family: "'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif" },
   ];
 
   const templateOptions = [
@@ -88,9 +96,50 @@ const UISettings = () => {
     }
   };
 
+  const loadGoogleFont = (fontValue: string) => {
+    const fontUrls = {
+      inter: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
+      roboto: 'https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap',
+      playfair: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap',
+      lato: 'https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap',
+      opensans: 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap',
+      montserrat: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap',
+      poppins: 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap',
+      sourcesans: 'https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap',
+      nunito: 'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&display=swap',
+      worksans: 'https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap',
+      fira: 'https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700&display=swap',
+      ubuntu: 'https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap',
+      raleway: 'https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&display=swap',
+      merriweather: 'https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&display=swap',
+      oswald: 'https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&display=swap',
+      dmsans: 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap',
+    };
+
+    const fontUrl = fontUrls[fontValue];
+    if (!fontUrl) return;
+
+    // Remove existing font link if any
+    const existingLink = document.querySelector('link[data-font-family]');
+    if (existingLink) {
+      existingLink.remove();
+    }
+
+    // Add new font link
+    const link = document.createElement('link');
+    link.href = fontUrl;
+    link.rel = 'stylesheet';
+    link.setAttribute('data-font-family', fontValue);
+    document.head.appendChild(link);
+  };
+
   const applyFont = (fontValue: string) => {
     const font = fontOptions.find(f => f.value === fontValue);
     if (font) {
+      // Load Google Font
+      loadGoogleFont(fontValue);
+      
+      // Apply font family
       document.documentElement.style.setProperty("--font-family", font.family);
       document.body.style.fontFamily = font.family;
     }
@@ -172,7 +221,7 @@ const UISettings = () => {
                 <SelectTrigger>
                   <SelectValue placeholder="Select a font" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-60">
                   {fontOptions.map((font) => (
                     <SelectItem key={font.value} value={font.value}>
                       <span style={{ fontFamily: font.family }}>{font.label}</span>
