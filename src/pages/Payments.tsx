@@ -1,10 +1,9 @@
-
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Filter, ArrowUpDown, GripVertical, Upload, Download, FileSpreadsheet } from "lucide-react";
+import { Plus, Search, ArrowUpDown, GripVertical } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -15,9 +14,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import PaymentFilterBar from "@/components/payments/PaymentFilterBar";
+import AddPaymentDialog from "@/components/payments/AddPaymentDialog";
+import PaymentExcelImportExport from "@/components/payments/PaymentExcelImportExport";
 
 interface VendorPayment {
   id: string;
@@ -46,7 +46,6 @@ const Payments = () => {
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddPaymentOpen, setIsAddPaymentOpen] = useState(false);
-  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [filters, setFilters] = useState({});
 
   const [vendorPayments, setVendorPayments] = useState<VendorPayment[]>([
@@ -267,6 +266,11 @@ const Payments = () => {
     payment.companyName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleDataChange = () => {
+    // Refresh data when payments are imported
+    window.location.reload();
+  };
+
   const downloadTemplate = () => {
     toast.success("Excel template will be downloaded");
   };
@@ -289,10 +293,7 @@ const Payments = () => {
             <p className="text-muted-foreground">All vendor payments for this project</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={exportData}>
-              <Download className="mr-2 h-4 w-4" />
-              Export
-            </Button>
+            <PaymentExcelImportExport onDataChange={handleDataChange} />
             <Button onClick={() => setIsAddPaymentOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Add Payment
@@ -380,18 +381,7 @@ const Payments = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={downloadTemplate}>
-            <FileSpreadsheet className="mr-2 h-4 w-4" />
-            Template
-          </Button>
-          <Button variant="outline" onClick={() => setIsImportDialogOpen(true)}>
-            <Upload className="mr-2 h-4 w-4" />
-            Import
-          </Button>
-          <Button variant="outline" onClick={exportData}>
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
+          <PaymentExcelImportExport onDataChange={handleDataChange} />
           <Button onClick={() => setIsAddPaymentOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Add Payment
@@ -608,28 +598,10 @@ const Payments = () => {
         </TabsContent>
       </Tabs>
 
-      <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Import Payments from Excel</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Upload an Excel file with payment data. Make sure to follow the template format.
-            </p>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={downloadTemplate} className="flex-1">
-                <FileSpreadsheet className="mr-2 h-4 w-4" />
-                Download Template
-              </Button>
-              <Button className="flex-1">
-                <Upload className="mr-2 h-4 w-4" />
-                Choose File
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <AddPaymentDialog 
+        open={isAddPaymentOpen} 
+        onOpenChange={setIsAddPaymentOpen} 
+      />
     </div>
   );
 };
