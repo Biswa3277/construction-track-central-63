@@ -19,12 +19,10 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import ProjectProgressSection from "@/components/projects/ProjectProgressSection";
-import ThingsToDoList from "@/components/projects/ThingsToDoList";
 
 const ProjectDashboard = () => {
   const [projects, setProjects] = useState([]);
   const [payments, setPayments] = useState([]);
-  const [todos, setTodos] = useState([]);
 
   useEffect(() => {
     loadDashboardData();
@@ -34,11 +32,9 @@ const ProjectDashboard = () => {
     // Load projects from billing system
     const storedProjects = JSON.parse(localStorage.getItem('billing_projects') || '[]');
     const storedPayments = JSON.parse(localStorage.getItem('billing_payments') || '[]');
-    const storedTodos = JSON.parse(localStorage.getItem('project_todos') || '[]');
     
     setProjects(storedProjects);
     setPayments(storedPayments);
-    setTodos(storedTodos);
   };
 
   // Calculate statistics
@@ -58,20 +54,12 @@ const ProjectDashboard = () => {
     overdueCount: projects.filter(p => p.totalPending > 0 && p.status === 'active').length
   };
 
-  const todoStats = {
-    total: todos.length,
-    completed: todos.filter(t => t.status === 'completed').length,
-    inProgress: todos.filter(t => t.status === 'in-progress').length,
-    pending: todos.filter(t => t.status === 'pending').length,
-    overdue: todos.filter(t => new Date(t.targetDate) < new Date() && t.status !== 'completed').length
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Project Dashboard</h1>
-          <p className="text-muted-foreground">Comprehensive overview of all projects, payments, and tasks</p>
+          <p className="text-muted-foreground">Comprehensive overview of all projects and payments</p>
         </div>
       </div>
 
@@ -156,58 +144,8 @@ const ProjectDashboard = () => {
         </Link>
       </div>
 
-      {/* Things To Do Overview */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Things To Do</CardTitle>
-            <CardDescription>Track your parallel tasks and deadlines</CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline">{todoStats.total} Total</Badge>
-            <Badge variant="secondary">{todoStats.completed} Completed</Badge>
-            {todoStats.overdue > 0 && (
-              <Badge variant="destructive">{todoStats.overdue} Overdue</Badge>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{todoStats.pending}</div>
-              <p className="text-sm text-muted-foreground">Pending</p>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-600">{todoStats.inProgress}</div>
-              <p className="text-sm text-muted-foreground">In Progress</p>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{todoStats.completed}</div>
-              <p className="text-sm text-muted-foreground">Completed</p>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">{todoStats.overdue}</div>
-              <p className="text-sm text-muted-foreground">Overdue</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Main Content Tabs */}
-      <Tabs defaultValue="projects" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="projects">Project Progress & Management</TabsTrigger>
-          <TabsTrigger value="todos">Things To Do List</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="projects" className="space-y-4">
-          <ProjectProgressSection projects={projects} onProjectsUpdate={loadDashboardData} />
-        </TabsContent>
-        
-        <TabsContent value="todos" className="space-y-4">
-          <ThingsToDoList todos={todos} onTodosUpdate={loadDashboardData} />
-        </TabsContent>
-      </Tabs>
+      {/* Project Progress & Management */}
+      <ProjectProgressSection projects={projects} onProjectsUpdate={loadDashboardData} />
     </div>
   );
 };
