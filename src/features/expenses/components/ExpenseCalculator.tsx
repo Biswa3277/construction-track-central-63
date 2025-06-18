@@ -307,22 +307,6 @@ const ExpenseCalculator = ({ refreshTrigger }: ExpenseCalculatorProps) => {
       </CardContent>
     </Card>
   );
-
-  function getAvailableMonths() {
-    const months = expenses.map(expense => {
-      const date = new Date(expense.date);
-      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    });
-    return [...new Set(months)].sort().reverse();
-  }
-
-  function resetCalculation() {
-    setCalculationResult(null);
-    setSingleDate(null);
-    setFromDate(null);
-    setToDate(null);
-    setSelectedMonth('');
-  }
 };
 
 export default ExpenseCalculator;
