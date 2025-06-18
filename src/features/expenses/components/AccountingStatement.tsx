@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -213,36 +212,6 @@ const AccountingStatement = ({ refreshTrigger }: AccountingStatementProps) => {
                 ))}
               </TableBody>
             </Table>
-          </div>
-        </div>
-
-        {/* Summary */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-red-50 p-4 rounded-lg text-center">
-            <h3 className="text-sm font-medium text-red-800">Total Debits (Spent)</h3>
-            <p className="text-xl font-bold text-red-600">
-              ₹{statementEntries.reduce((sum, entry) => entry.id !== 'opening' ? sum + entry.debit : sum, 0).toLocaleString()}
-            </p>
-          </div>
-          <div className="bg-green-50 p-4 rounded-lg text-center">
-            <h3 className="text-sm font-medium text-green-800">Total Credits (Received)</h3>
-            <p className="text-xl font-bold text-green-600">
-              ₹{statementEntries.reduce((sum, entry) => entry.id !== 'opening' ? sum + entry.credit : sum, 0).toLocaleString()}
-            </p>
-          </div>
-          <div className={`p-4 rounded-lg text-center ${
-            statementEntries[statementEntries.length - 1]?.balance >= 0 ? 'bg-blue-50' : 'bg-orange-50'
-          }`}>
-            <h3 className={`text-sm font-medium ${
-              statementEntries[statementEntries.length - 1]?.balance >= 0 ? 'text-blue-800' : 'text-orange-800'
-            }`}>
-              Final Balance
-            </h3>
-            <p className={`text-xl font-bold ${
-              statementEntries[statementEntries.length - 1]?.balance >= 0 ? 'text-blue-600' : 'text-orange-600'
-            }`}>
-              ₹{(statementEntries[statementEntries.length - 1]?.balance || 0).toLocaleString()}
-            </p>
           </div>
         </div>
       </CardContent>
