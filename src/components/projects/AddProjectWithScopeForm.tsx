@@ -20,9 +20,11 @@ interface ScopeOfWork {
 
 interface AddProjectWithScopeFormProps {
   onSuccess: () => void;
+  selectedDepartment?: string;
 }
 
-const AddProjectWithScopeForm = ({ onSuccess }: AddProjectWithScopeFormProps) => {
+const AddProjectWithScopeForm = ({ onSuccess, selectedDepartment }: AddProjectWithScopeFormProps) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -42,11 +44,11 @@ const AddProjectWithScopeForm = ({ onSuccess }: AddProjectWithScopeFormProps) =>
       description: "",
       estimatedCost: 0,
       timeline: "",
-      department: ""
+      department: selectedDepartment || ""
     }
   ]);
 
-  const departments = ["Engineering", "Construction", "Design", "Testing", "Quality Control", "Safety"];
+  const departments = ["Civil", "Mechanical", "Design", "Accounts", "Tender", "Purchase", "Automation", "Engineering", "Construction", "Testing", "Quality Control", "Safety"];
 
   const addScopeOfWork = () => {
     const newScope: ScopeOfWork = {
@@ -55,12 +57,16 @@ const AddProjectWithScopeForm = ({ onSuccess }: AddProjectWithScopeFormProps) =>
       description: "",
       estimatedCost: 0,
       timeline: "",
-      department: ""
+      department: selectedDepartment || ""
     };
     setScopeOfWorks([...scopeOfWorks, newScope]);
   };
 
   const removeScopeOfWork = (id: string) => {
+    if (scopeOfWorks.length <= 1) {
+      toast.error("At least one scope of work is required");
+      return;
+    }
     setScopeOfWorks(scopeOfWorks.filter(scope => scope.id !== id));
   };
 
@@ -70,63 +76,107 @@ const AddProjectWithScopeForm = ({ onSuccess }: AddProjectWithScopeFormProps) =>
     ));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
-    if (!formData.name || !formData.projectOwner || !formData.totalCost) {
-      toast.error("Please fill in all required fields");
-      return;
+    try {
+      console.log("Starting project submission...");
+      
+      if (!formData.name || !formData.projectOwner || !formData.totalCost) {
+        toast.error("Please fill in all required fields");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const validScopes = scopeOfWorks.filter(scope => scope.title && scope.description);
+      if (validScopes.length === 0) {
+        toast.error("Please add at least one valid scope of work");
+        setIsSubmitting(false);
+        return;
+      }
+
+      console.log("Valid scopes:", validScopes);
+
+      const project = {
+        id: Date.now().toString(),
+        ...formData,
+        totalCost: parseFloat(formData.totalCost),
+        totalReceived: 0,
+        totalPending: parseFloat(formData.totalCost),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        departments: validScopes.map(scope => scope.department).filter(Boolean),
+        workPlan: validScopes.map((scope, index) => ({
+          id: scope.id,
+          departmentId: scope.department,
+          departmentName: scope.department,
+          targetDate: scope.timeline,
+          status: 'pending' as const,
+          notes: `${scope.title}: ${scope.description}`,
+          estimatedCost: scope.estimatedCost
+        })),
+        paymentTerms: [],
+        ganttTasks: [],
+        projectResources: {
+          totalBudget: parseFloat(formData.totalCost),
+          allocatedBudget: 0,
+          labor: 0,
+          materials: 0,
+          equipment: 0
+        },
+        bufferDays: 0,
+        workingDaysPerWeek: 5,
+        riskAssessment: {
+          overall: 'medium' as const,
+          technical: 'medium' as const,
+          financial: 'medium' as const,
+          schedule: 'medium' as const
+        },
+        milestones: [],
+        scopeOfWorks: validScopes
+      };
+
+      console.log("Project to be saved:", project);
+
+      const existingProjects = JSON.parse(localStorage.getItem('billing_projects') || '[]');
+      console.log("Existing projects:", existingProjects.length);
+      
+      existingProjects.push(project);
+      localStorage.setItem('billing_projects', JSON.stringify(existingProjects));
+      
+      console.log("Project saved successfully");
+      toast.success("Project created successfully!");
+      
+      // Reset form
+      setFormData({
+        name: "",
+        description: "",
+        projectOwner: "",
+        projectOwnerDetails: "",
+        totalCost: "",
+        status: "planning",
+        startDate: "",
+        expectedEndDate: "",
+        projectManager: ""
+      });
+      
+      setScopeOfWorks([{
+        id: "1",
+        title: "",
+        description: "",
+        estimatedCost: 0,
+        timeline: "",
+        department: selectedDepartment || ""
+      }]);
+
+      onSuccess();
+    } catch (error) {
+      console.error("Error creating project:", error);
+      toast.error("Failed to create project. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const validScopes = scopeOfWorks.filter(scope => scope.title && scope.description);
-    if (validScopes.length === 0) {
-      toast.error("Please add at least one scope of work");
-      return;
-    }
-
-    const project = {
-      id: Date.now().toString(),
-      ...formData,
-      totalCost: parseFloat(formData.totalCost),
-      totalReceived: 0,
-      totalPending: parseFloat(formData.totalCost),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      departments: validScopes.map(scope => scope.department).filter(Boolean),
-      workPlan: validScopes.map((scope, index) => ({
-        id: scope.id,
-        departmentId: scope.department,
-        departmentName: scope.department,
-        targetDate: scope.timeline,
-        status: 'pending' as const,
-        notes: `${scope.title}: ${scope.description}`
-      })),
-      paymentTerms: [],
-      ganttTasks: [],
-      projectResources: {
-        totalBudget: parseFloat(formData.totalCost),
-        allocatedBudget: 0,
-        labor: 0,
-        materials: 0,
-        equipment: 0
-      },
-      bufferDays: 0,
-      workingDaysPerWeek: 5,
-      riskAssessment: {
-        overall: 'medium' as const,
-        technical: 'medium' as const,
-        financial: 'medium' as const,
-        schedule: 'medium' as const
-      },
-      milestones: [],
-      scopeOfWorks: validScopes
-    };
-
-    const existingProjects = JSON.parse(localStorage.getItem('billing_projects') || '[]');
-    existingProjects.push(project);
-    localStorage.setItem('billing_projects', JSON.stringify(existingProjects));
-
-    onSuccess();
   };
 
   return (
@@ -274,7 +324,10 @@ const AddProjectWithScopeForm = ({ onSuccess }: AddProjectWithScopeFormProps) =>
                 </div>
                 <div>
                   <Label>Department</Label>
-                  <Select value={scope.department} onValueChange={(value) => updateScopeOfWork(scope.id, 'department', value)}>
+                  <Select 
+                    value={scope.department} 
+                    onValueChange={(value) => updateScopeOfWork(scope.id, 'department', value)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select department" />
                     </SelectTrigger>
@@ -320,7 +373,9 @@ const AddProjectWithScopeForm = ({ onSuccess }: AddProjectWithScopeFormProps) =>
       </Card>
 
       <div className="flex gap-2">
-        <Button type="submit" className="flex-1">Create Project</Button>
+        <Button type="submit" className="flex-1" disabled={isSubmitting}>
+          {isSubmitting ? "Creating..." : "Create Project"}
+        </Button>
         <Button type="button" variant="outline" onClick={() => window.history.back()}>
           Cancel
         </Button>

@@ -523,7 +523,10 @@ const DepartmentProjects = () => {
           <DialogHeader>
             <DialogTitle>Add New Project</DialogTitle>
           </DialogHeader>
-          <AddProjectWithScopeForm onSuccess={handleAddProject} />
+          <AddProjectWithScopeForm 
+            onSuccess={handleAddProject} 
+            selectedDepartment={selectedDepartment ? departments.find(d => d.id === selectedDepartment)?.name : undefined}
+          />
         </DialogContent>
       </Dialog>
 
