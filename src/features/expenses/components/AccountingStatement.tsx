@@ -4,8 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
 import { ExpenseItem } from "../types/expenseTypes";
 
 interface AccountingStatementProps {
@@ -93,7 +91,7 @@ const AccountingStatement = ({ refreshTrigger }: AccountingStatementProps) => {
         date: new Date(expense.date).toLocaleDateString(),
         description: expense.description,
         category: expense.category,
-        project: expense.projectName || '-',
+        project: expense.projectName || 'Others',
         type: expense.type,
         amount: expense.amount,
         paymentMethod: expense.paymentMethod,
@@ -131,19 +129,6 @@ const AccountingStatement = ({ refreshTrigger }: AccountingStatementProps) => {
     return amount === 0 ? '' : amount.toFixed(2);
   };
 
-  const getTransactionTypeBadge = (transactionType: string) => {
-    if (transactionType === 'opening' || transactionType === 'totals') return null;
-    
-    if (transactionType === 'spent') {
-      return <Badge variant="destructive">Spent</Badge>;
-    } else if (transactionType === 'received') {
-      return <Badge className="bg-blue-500">Received</Badge>;
-    } else if (transactionType === 'total_received') {
-      return <Badge className="bg-cyan-500">Total Received</Badge>;
-    }
-    return null;
-  };
-
   const getTypeBadge = (type: string) => {
     if (type === 'opening' || type === 'totals') return null;
     
@@ -178,14 +163,12 @@ const AccountingStatement = ({ refreshTrigger }: AccountingStatementProps) => {
                   <TableHead className="font-bold border-r min-w-[100px]">Date</TableHead>
                   <TableHead className="font-bold border-r min-w-[150px]">Description</TableHead>
                   <TableHead className="font-bold border-r min-w-[120px]">Category</TableHead>
-                  <TableHead className="font-bold border-r min-w-[120px]">Project</TableHead>
+                  <TableHead className="font-bold border-r min-w-[120px]">Project/Others</TableHead>
                   <TableHead className="font-bold border-r min-w-[100px]">Type</TableHead>
-                  <TableHead className="font-bold border-r min-w-[100px]">Amount</TableHead>
                   <TableHead className="font-bold border-r min-w-[120px]">Payment Method</TableHead>
                   <TableHead className="font-bold border-r text-center min-w-[100px]">Debit</TableHead>
                   <TableHead className="font-bold border-r text-center min-w-[100px]">Credit</TableHead>
                   <TableHead className="font-bold text-center min-w-[100px]">Balance</TableHead>
-                  <TableHead className="font-bold min-w-[100px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -212,9 +195,6 @@ const AccountingStatement = ({ refreshTrigger }: AccountingStatementProps) => {
                     <TableCell className="border-r">
                       {getTypeBadge(entry.type)}
                     </TableCell>
-                    <TableCell className="border-r text-right">
-                      {entry.amount > 0 ? `₹${entry.amount.toLocaleString()}` : ''}
-                    </TableCell>
                     <TableCell className="border-r">
                       {entry.paymentMethod}
                     </TableCell>
@@ -228,18 +208,6 @@ const AccountingStatement = ({ refreshTrigger }: AccountingStatementProps) => {
                       entry.balance < 0 ? 'text-red-600' : entry.balance > 0 ? 'text-green-600' : 'text-gray-600'
                     }`}>
                       {entry.balance.toFixed(2)}
-                    </TableCell>
-                    <TableCell>
-                      {entry.id !== 'opening' && entry.id !== 'totals' && (
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      )}
                     </TableCell>
                   </TableRow>
                 ))}
