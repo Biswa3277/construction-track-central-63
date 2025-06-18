@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,13 +13,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DatePicker } from "@/components/ui/date-picker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowLeft, Plus, MapPin, Clock, CheckCircle, Calendar as CalendarIcon, Save, Edit, Trash2 } from "lucide-react";
 import { TeamMember } from "../types/teamTypes";
 import { toast } from "sonner";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, differenceInDays } from "date-fns";
 
 interface WorkPlan {
   id: string;
-  date: string;
+  startDate: string;
+  endDate: string;
   title: string;
   description: string;
   location: string;
@@ -44,12 +48,13 @@ interface TeamMemberDashboardProps {
 }
 
 const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [workPlans, setWorkPlans] = useState<WorkPlan[]>([]);
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [isAddTodoOpen, setIsAddTodoOpen] = useState(false);
   const [selectedWorkPlan, setSelectedWorkPlan] = useState<WorkPlan | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [workPlanForm, setWorkPlanForm] = useState({
     title: '',
     description: '',
@@ -75,10 +80,17 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
   }, [member.id]);
 
   useEffect(() => {
-    // Update form when selectedDate changes
-    if (selectedDate) {
-      const dateStr = selectedDate.toISOString().split('T')[0];
-      const existingPlan = workPlans.find(wp => wp.date === dateStr);
+    // Reset form when dates change
+    if (selectedDates.length > 0) {
+      // Check if there's an existing work plan for these dates
+      const existingPlan = workPlans.find(wp => {
+        const planStart = new Date(wp.startDate);
+        const planEnd = new Date(wp.endDate);
+        return selectedDates.some(date => {
+          const dateStr = date.toISOString().split('T')[0];
+          return dateStr >= wp.startDate && dateStr <= wp.endDate;
+        });
+      });
       
       if (existingPlan) {
         setSelectedWorkPlan(existingPlan);
@@ -105,12 +117,15 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
         });
         setIsEditing(true);
       }
+    } else {
+      setSelectedWorkPlan(null);
+      setIsEditing(false);
     }
-  }, [selectedDate, workPlans]);
+  }, [selectedDates, workPlans]);
 
   const getDateStatus = (date: Date) => {
     const dateStr = date.toISOString().split('T')[0];
-    const workPlan = workPlans.find(wp => wp.date === dateStr);
+    const workPlan = workPlans.find(wp => dateStr >= wp.startDate && dateStr <= wp.endDate);
     
     if (workPlan) {
       return workPlan.status === 'leave' ? 'leave' : 'has-plan';
@@ -120,19 +135,41 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
 
   const getDateWorkPlan = (date: Date) => {
     const dateStr = date.toISOString().split('T')[0];
-    return workPlans.find(wp => wp.date === dateStr);
+    return workPlans.find(wp => dateStr >= wp.startDate && dateStr <= wp.endDate);
+  };
+
+  const handleDateSelect = (date: Date | undefined) => {
+    if (!date) return;
+
+    const isAlreadySelected = selectedDates.some(d => d.toDateString() === date.toDateString());
+    
+    if (isAlreadySelected) {
+      // Remove date from selection
+      setSelectedDates(selectedDates.filter(d => d.toDateString() !== date.toDateString()));
+    } else {
+      // Add date to selection (max 6 days)
+      if (selectedDates.length < 6) {
+        setSelectedDates([...selectedDates, date].sort((a, b) => a.getTime() - b.getTime()));
+      } else {
+        toast.error("Maximum 6 days can be selected at once");
+      }
+    }
   };
 
   const handleSaveWorkPlan = () => {
-    if (!selectedDate || !workPlanForm.title) {
-      toast.error("Please fill in the required fields");
+    if (selectedDates.length === 0 || !workPlanForm.title) {
+      toast.error("Please select dates and fill in the required fields");
       return;
     }
 
-    const dateStr = selectedDate.toISOString().split('T')[0];
+    const sortedDates = selectedDates.sort((a, b) => a.getTime() - b.getTime());
+    const startDate = sortedDates[0].toISOString().split('T')[0];
+    const endDate = sortedDates[sortedDates.length - 1].toISOString().split('T')[0];
+
     const newWorkPlan: WorkPlan = {
       id: selectedWorkPlan?.id || Date.now().toString(),
-      date: dateStr,
+      startDate,
+      endDate,
       title: workPlanForm.title,
       description: workPlanForm.description,
       location: workPlanForm.location,
@@ -155,6 +192,7 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
     localStorage.setItem(`workPlans_${member.id}`, JSON.stringify(updatedWorkPlans));
     setSelectedWorkPlan(newWorkPlan);
     setIsEditing(false);
+    setSelectedDates([]);
     toast.success("Work plan saved successfully!");
   };
 
@@ -165,8 +203,21 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
     setWorkPlans(updatedWorkPlans);
     localStorage.setItem(`workPlans_${member.id}`, JSON.stringify(updatedWorkPlans));
     setSelectedWorkPlan(null);
-    setIsEditing(true);
+    setSelectedDates([]);
+    setIsEditing(false);
     toast.success("Work plan deleted successfully!");
+  };
+
+  const handleEditWorkPlan = () => {
+    if (!selectedWorkPlan) return;
+    
+    // Generate dates from start to end
+    const startDate = new Date(selectedWorkPlan.startDate);
+    const endDate = new Date(selectedWorkPlan.endDate);
+    const dates = eachDayOfInterval({ start: startDate, end: endDate });
+    
+    setSelectedDates(dates);
+    setIsEditing(true);
   };
 
   const handleAddTodo = () => {
@@ -225,6 +276,26 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
     return <Badge className={colors[priority as keyof typeof colors]}>{priority.toUpperCase()}</Badge>;
   };
 
+  const getStatusBadge = (status: string) => {
+    const colors = {
+      planned: "bg-blue-100 text-blue-800",
+      completed: "bg-green-100 text-green-800",
+      leave: "bg-gray-100 text-gray-800"
+    };
+    return <Badge className={colors[status as keyof typeof colors]}>{status.toUpperCase()}</Badge>;
+  };
+
+  const getMonthWorkPlans = () => {
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(currentMonth);
+    
+    return workPlans.filter(wp => {
+      const planStart = new Date(wp.startDate);
+      const planEnd = new Date(wp.endDate);
+      return planStart <= monthEnd && planEnd >= monthStart;
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -262,32 +333,42 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
               <Card>
                 <CardHeader>
                   <CardTitle>Calendar</CardTitle>
-                  <CardDescription>Plan daily work activities and track completion</CardDescription>
+                  <CardDescription>Select dates to plan work activities (max 6 days)</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <TooltipProvider>
                     <Calendar
                       mode="single"
-                      selected={selectedDate || undefined}
-                      onSelect={setSelectedDate}
+                      selected={undefined}
+                      onSelect={handleDateSelect}
+                      month={currentMonth}
+                      onMonthChange={setCurrentMonth}
                       className="rounded-md border w-full"
                       modifiers={{
                         'has-plan': (date) => getDateStatus(date) === 'has-plan',
                         'no-plan': (date) => getDateStatus(date) === 'no-plan' && date <= new Date(),
-                        'leave': (date) => getDateStatus(date) === 'leave'
+                        'leave': (date) => getDateStatus(date) === 'leave',
+                        'selected': (date) => selectedDates.some(d => d.toDateString() === date.toDateString())
                       }}
                       modifiersStyles={{
                         'has-plan': { backgroundColor: '#dcfce7', color: '#166534' },
                         'no-plan': { backgroundColor: '#fecaca', color: '#dc2626' },
-                        'leave': { backgroundColor: '#e5e7eb', color: '#6b7280' }
+                        'leave': { backgroundColor: '#e5e7eb', color: '#6b7280' },
+                        'selected': { backgroundColor: '#3b82f6', color: '#ffffff' }
                       }}
                       components={{
                         Day: ({ date, ...props }) => {
                           const workPlan = getDateWorkPlan(date);
+                          const isSelected = selectedDates.some(d => d.toDateString() === date.toDateString());
+                          
                           const dayElement = (
-                            <div {...props}>
+                            <button 
+                              {...props}
+                              onClick={() => handleDateSelect(date)}
+                              className={`h-9 w-9 p-0 font-normal hover:bg-accent hover:text-accent-foreground ${isSelected ? 'bg-primary text-primary-foreground' : ''}`}
+                            >
                               {date.getDate()}
-                            </div>
+                            </button>
                           );
 
                           if (workPlan) {
@@ -330,7 +411,20 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
                       <div className="w-4 h-4 bg-gray-300 rounded"></div>
                       <span>On Leave</span>
                     </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                      <span>Selected</span>
+                    </div>
                   </div>
+
+                  {selectedDates.length > 0 && (
+                    <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                      <p className="font-medium">Selected Dates ({selectedDates.length}/6):</p>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedDates.map(date => format(date, 'MMM dd')).join(', ')}
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -338,11 +432,16 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
               <Card>
                 <CardHeader>
                   <CardTitle>
-                    {selectedDate ? `Plans for ${selectedDate.toLocaleDateString()}` : 'Select a date'}
+                    {selectedDates.length > 0 
+                      ? `Work Plan for ${selectedDates.length} day${selectedDates.length > 1 ? 's' : ''}` 
+                      : selectedWorkPlan 
+                        ? `Work Plan Details` 
+                        : 'Select dates to plan work'
+                    }
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {selectedDate ? (
+                  {(selectedDates.length > 0 || selectedWorkPlan) ? (
                     <div className="space-y-4">
                       <div>
                         <Label htmlFor="title">Title *</Label>
@@ -452,16 +551,18 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
                             )}
                           </>
                         ) : (
-                          <>
-                            <Button onClick={() => setIsEditing(true)} className="flex items-center gap-2">
-                              <Edit className="h-4 w-4" />
-                              Edit
-                            </Button>
-                            <Button variant="destructive" onClick={handleDeleteWorkPlan} className="flex items-center gap-2">
-                              <Trash2 className="h-4 w-4" />
-                              Delete
-                            </Button>
-                          </>
+                          selectedWorkPlan && (
+                            <>
+                              <Button onClick={handleEditWorkPlan} className="flex items-center gap-2">
+                                <Edit className="h-4 w-4" />
+                                Edit
+                              </Button>
+                              <Button variant="destructive" onClick={handleDeleteWorkPlan} className="flex items-center gap-2">
+                                <Trash2 className="h-4 w-4" />
+                                Delete
+                              </Button>
+                            </>
+                          )
                         )}
                       </div>
 
@@ -471,22 +572,115 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
                             <span className="font-medium">Priority:</span>
                             {getPriorityBadge(selectedWorkPlan.priority)}
                           </div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="font-medium">Status:</span>
+                            {getStatusBadge(selectedWorkPlan.status)}
+                          </div>
                           {selectedWorkPlan.startTime && selectedWorkPlan.endTime && (
                             <p className="text-sm text-muted-foreground">
                               Time: {selectedWorkPlan.startTime} - {selectedWorkPlan.endTime}
                             </p>
                           )}
+                          <p className="text-sm text-muted-foreground">
+                            Duration: {format(new Date(selectedWorkPlan.startDate), 'MMM dd')} - {format(new Date(selectedWorkPlan.endDate), 'MMM dd')}
+                          </p>
                         </div>
                       )}
                     </div>
                   ) : (
                     <p className="text-center text-muted-foreground py-8">
-                      Select a date to view or create work plans
+                      Select dates from the calendar to create work plans
                     </p>
                   )}
                 </CardContent>
               </Card>
             </div>
+
+            {/* Work Plans Table */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Monthly Work Plans - {format(currentMonth, 'MMMM yyyy')}</CardTitle>
+                <CardDescription>Overview of all work plans for the current month</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Duration</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>Time</TableHead>
+                      <TableHead>Priority</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {getMonthWorkPlans().map((workPlan) => (
+                      <TableRow key={workPlan.id}>
+                        <TableCell className="font-medium">{workPlan.title}</TableCell>
+                        <TableCell>
+                          {format(new Date(workPlan.startDate), 'MMM dd')} - {format(new Date(workPlan.endDate), 'MMM dd')}
+                        </TableCell>
+                        <TableCell>{workPlan.location || '-'}</TableCell>
+                        <TableCell>
+                          {workPlan.startTime && workPlan.endTime 
+                            ? `${workPlan.startTime} - ${workPlan.endTime}`
+                            : '-'
+                          }
+                        </TableCell>
+                        <TableCell>{getPriorityBadge(workPlan.priority)}</TableCell>
+                        <TableCell>{getStatusBadge(workPlan.status)}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedWorkPlan(workPlan);
+                                const startDate = new Date(workPlan.startDate);
+                                const endDate = new Date(workPlan.endDate);
+                                const dates = eachDayOfInterval({ start: startDate, end: endDate });
+                                setSelectedDates(dates);
+                                setWorkPlanForm({
+                                  title: workPlan.title,
+                                  description: workPlan.description,
+                                  location: workPlan.location,
+                                  priority: workPlan.priority,
+                                  startTime: workPlan.startTime || '',
+                                  endTime: workPlan.endTime || '',
+                                  status: workPlan.status
+                                });
+                                setIsEditing(true);
+                              }}
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="destructive"
+                              onClick={() => {
+                                setSelectedWorkPlan(workPlan);
+                                handleDeleteWorkPlan();
+                              }}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {getMonthWorkPlans().length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                          No work plans for this month
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
 
