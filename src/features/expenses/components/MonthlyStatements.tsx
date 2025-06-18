@@ -51,10 +51,10 @@ const MonthlyStatements = ({ refreshTrigger }: MonthlyStatementsProps) => {
       const projectExpenses = monthExpenses.filter(e => e.type === 'project');
       const otherExpenses = monthExpenses.filter(e => e.type === 'other');
 
-      const projectReceived = projectExpenses.filter(e => e.transactionType === 'received' || e.transactionType === 'total_received').reduce((sum, e) => sum + e.amount, 0);
+      const projectReceived = projectExpenses.filter(e => e.transactionType === 'received').reduce((sum, e) => sum + e.amount, 0);
       const projectSpent = projectExpenses.filter(e => e.transactionType === 'spent').reduce((sum, e) => sum + e.amount, 0);
       
-      const otherReceived = otherExpenses.filter(e => e.transactionType === 'received' || e.transactionType === 'total_received').reduce((sum, e) => sum + e.amount, 0);
+      const otherReceived = otherExpenses.filter(e => e.transactionType === 'received').reduce((sum, e) => sum + e.amount, 0);
       const otherSpent = otherExpenses.filter(e => e.transactionType === 'spent').reduce((sum, e) => sum + e.amount, 0);
 
       return {

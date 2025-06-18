@@ -64,7 +64,7 @@ const ExpenseCalculator = ({ refreshTrigger }: ExpenseCalculatorProps) => {
     const filteredExpenses = filterExpensesByDate(expenses);
     
     const receivedEntries = filteredExpenses.filter(expense => 
-      expense.transactionType === 'received' || expense.transactionType === 'total_received'
+      expense.transactionType === 'received'
     );
     
     const spentEntries = filteredExpenses.filter(expense => 
@@ -307,6 +307,22 @@ const ExpenseCalculator = ({ refreshTrigger }: ExpenseCalculatorProps) => {
       </CardContent>
     </Card>
   );
+
+  function getAvailableMonths() {
+    const months = expenses.map(expense => {
+      const date = new Date(expense.date);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    });
+    return [...new Set(months)].sort().reverse();
+  }
+
+  function resetCalculation() {
+    setCalculationResult(null);
+    setSingleDate(null);
+    setFromDate(null);
+    setToDate(null);
+    setSelectedMonth('');
+  }
 };
 
 export default ExpenseCalculator;

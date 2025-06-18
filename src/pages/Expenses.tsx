@@ -44,7 +44,7 @@ const Expenses = () => {
     let totalSpent = 0;
 
     projectExpenses.forEach(expense => {
-      if (expense.transactionType === 'received' || expense.transactionType === 'total_received') {
+      if (expense.transactionType === 'received') {
         totalReceived += expense.amount;
       } else if (expense.transactionType === 'spent') {
         totalSpent += expense.amount;
@@ -65,7 +65,7 @@ const Expenses = () => {
     let totalSpent = 0;
 
     otherExpenses.forEach(expense => {
-      if (expense.transactionType === 'received' || expense.transactionType === 'total_received') {
+      if (expense.transactionType === 'received') {
         totalReceived += expense.amount;
       } else if (expense.transactionType === 'spent') {
         totalSpent += expense.amount;

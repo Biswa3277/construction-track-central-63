@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -72,7 +73,7 @@ const ExpensesList = ({ type, refreshTrigger }: ExpensesListProps) => {
       if (expense.transactionType === 'spent') {
         debit = expense.amount;
         runningBalance -= expense.amount; // Subtract debit from balance
-      } else if (expense.transactionType === 'received' || expense.transactionType === 'total_received') {
+      } else if (expense.transactionType === 'received') {
         credit = expense.amount;
         runningBalance += expense.amount; // Add credit to balance
       }
@@ -175,8 +176,7 @@ const ExpensesList = ({ type, refreshTrigger }: ExpensesListProps) => {
                   {type === 'project' && <TableCell className="border-r">{expense.projectName || 'Others'}</TableCell>}
                   <TableCell className="border-r">
                     <Badge variant={expense.transactionType === 'spent' ? 'destructive' : 'default'}>
-                      {expense.transactionType === 'received' ? 'Received' : 
-                       expense.transactionType === 'total_received' ? 'Total Received' : 'Spent'}
+                      {expense.transactionType === 'received' ? 'Received' : 'Spent'}
                     </Badge>
                   </TableCell>
                   <TableCell className="border-r">{expense.paymentMethod}</TableCell>
