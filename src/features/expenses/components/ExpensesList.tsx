@@ -102,46 +102,12 @@ const ExpensesList = ({ type, refreshTrigger }: ExpensesListProps) => {
     return [...new Set(categories)];
   };
 
-  const getTotalReceived = () => {
-    return filteredExpenses.reduce((sum, expense) => sum + expense.credit, 0);
-  };
-
-  const getTotalSpent = () => {
-    return filteredExpenses.reduce((sum, expense) => sum + expense.debit, 0);
-  };
-
-  const getBalance = () => {
-    return getTotalReceived() - getTotalSpent();
-  };
-
   const formatAmount = (amount: number) => {
     return amount === 0 ? '' : amount.toFixed(2);
   };
 
   return (
     <div className="space-y-4">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-green-50 p-4 rounded-lg">
-          <h3 className="text-sm font-medium text-green-800">Total Received</h3>
-          <p className="text-2xl font-bold text-green-600">₹{getTotalReceived().toLocaleString()}</p>
-        </div>
-        <div className="bg-red-50 p-4 rounded-lg">
-          <h3 className="text-sm font-medium text-red-800">Total Spent</h3>
-          <p className="text-2xl font-bold text-red-600">₹{getTotalSpent().toLocaleString()}</p>
-        </div>
-        <div className={`p-4 rounded-lg ${getBalance() >= 0 ? 'bg-blue-50' : 'bg-orange-50'}`}>
-          <h3 className={`text-sm font-medium ${getBalance() >= 0 ? 'text-blue-800' : 'text-orange-800'}`}>Balance</h3>
-          <p className={`text-2xl font-bold ${getBalance() >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
-            ₹{getBalance().toLocaleString()}
-          </p>
-        </div>
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="text-sm font-medium text-gray-800">Total Entries</h3>
-          <p className="text-2xl font-bold text-gray-600">{filteredExpenses.length}</p>
-        </div>
-      </div>
-
       {/* Filters */}
       <div className="flex flex-col md:flex-row md:items-center gap-4">
         <div className="relative flex-1">
