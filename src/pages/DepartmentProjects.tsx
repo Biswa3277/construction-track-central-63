@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import ProjectProgressSection from "@/components/projects/ProjectProgressSection";
 
 // Simulated data for departments
 const departments = [
@@ -151,6 +152,7 @@ const DepartmentProjects = () => {
   const [projects, setProjects] = useState<any[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<any[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
+  const [billingProjects, setBillingProjects] = useState([]);
 
   useEffect(() => {
     // Get user's department from localStorage (in a real app)
@@ -165,7 +167,15 @@ const DepartmentProjects = () => {
     const allProjects = generateMockProjects(selectedDepartment || undefined);
     setProjects(allProjects);
     filterProjects(allProjects, statusFilter, searchQuery);
+
+    // Load billing projects
+    loadBillingProjects();
   }, [statusFilter, searchQuery, selectedDepartment]);
+
+  const loadBillingProjects = () => {
+    const storedProjects = JSON.parse(localStorage.getItem('billing_projects') || '[]');
+    setBillingProjects(storedProjects);
+  };
 
   const filterProjects = (projects: any[], status: string, query: string) => {
     let result = [...projects];
@@ -218,39 +228,44 @@ const DepartmentProjects = () => {
       </div>
       
       {!selectedDepartment ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Departments Overview</CardTitle>
-            <CardDescription>View and manage departments and their projects</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {departments.map(dept => (
-                <Card key={dept.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-2">
-                    <CardTitle>{dept.name}</CardTitle>
-                    <CardDescription>Manager: {dept.manager}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Ongoing Projects:</span>
-                      <Badge variant="outline">{dept.ongoingProjects} / {dept.totalProjects}</Badge>
-                    </div>
-                    <Progress value={(dept.ongoingProjects / dept.totalProjects) * 100} className="h-2" />
-                    <div className="flex justify-between mt-4">
-                      <Button size="sm" variant="outline" onClick={() => handleDepartmentAction(dept.id, 'projects')}>
-                        View Projects
-                      </Button>
-                      <Button size="sm" onClick={() => handleDepartmentAction(dept.id, 'payments')}>
-                        Payments
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle>Departments Overview</CardTitle>
+              <CardDescription>View and manage departments and their projects</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {departments.map(dept => (
+                  <Card key={dept.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                    <CardHeader className="pb-2">
+                      <CardTitle>{dept.name}</CardTitle>
+                      <CardDescription>Manager: {dept.manager}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Ongoing Projects:</span>
+                        <Badge variant="outline">{dept.ongoingProjects} / {dept.totalProjects}</Badge>
+                      </div>
+                      <Progress value={(dept.ongoingProjects / dept.totalProjects) * 100} className="h-2" />
+                      <div className="flex justify-between mt-4">
+                        <Button size="sm" variant="outline" onClick={() => handleDepartmentAction(dept.id, 'projects')}>
+                          View Projects
+                        </Button>
+                        <Button size="sm" onClick={() => handleDepartmentAction(dept.id, 'payments')}>
+                          Payments
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Project Progress & Management Section */}
+          <ProjectProgressSection projects={billingProjects} onProjectsUpdate={loadBillingProjects} />
+        </>
       ) : (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">

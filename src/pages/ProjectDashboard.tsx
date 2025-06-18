@@ -18,7 +18,6 @@ import {
   ArrowRight
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import ProjectProgressSection from "@/components/projects/ProjectProgressSection";
 
 const ProjectDashboard = () => {
   const [projects, setProjects] = useState([]);
@@ -65,7 +64,7 @@ const ProjectDashboard = () => {
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Link to="/projects?tab=progress">
+        <Link to="/department-projects">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Project Progress</CardTitle>
@@ -144,8 +143,31 @@ const ProjectDashboard = () => {
         </Link>
       </div>
 
-      {/* Project Progress & Management */}
-      <ProjectProgressSection projects={projects} onProjectsUpdate={loadDashboardData} />
+      {/* Additional dashboard content can be added here */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Dashboard Overview</CardTitle>
+          <CardDescription>Quick access to key project management areas</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="text-center p-4 border rounded-lg">
+              <h3 className="font-semibold mb-2">Project Management</h3>
+              <p className="text-sm text-muted-foreground mb-3">Manage projects and scope of works</p>
+              <Button asChild variant="outline">
+                <Link to="/department-projects">Go to Projects & Tasks</Link>
+              </Button>
+            </div>
+            <div className="text-center p-4 border rounded-lg">
+              <h3 className="font-semibold mb-2">Things To Do</h3>
+              <p className="text-sm text-muted-foreground mb-3">Track your parallel tasks and deadlines</p>
+              <Button asChild variant="outline">
+                <Link to="/things-to-do">Manage Tasks</Link>
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
