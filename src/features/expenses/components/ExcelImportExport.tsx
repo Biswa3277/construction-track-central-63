@@ -90,6 +90,7 @@ const ExcelImportExport = ({ onDataChange }: ExcelImportExportProps) => {
               paymentMethod: row['Payment Method'],
               personName: row['Person Name'] || undefined,
               billAvailable: row['Bill Available'] === 'Yes',
+              approvalStatus: 'waiting',
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
             };

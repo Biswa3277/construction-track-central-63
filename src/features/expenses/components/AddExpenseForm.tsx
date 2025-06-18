@@ -82,6 +82,7 @@ const AddExpenseForm = ({ onSuccess, defaultType = 'project' }: AddExpenseFormPr
         paymentMethod: data.paymentMethod,
         personName: data.personName,
         billAvailable: data.billAvailable,
+        approvalStatus: 'waiting',
         date: data.date.toISOString().split('T')[0],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
