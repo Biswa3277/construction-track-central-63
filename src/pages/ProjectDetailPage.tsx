@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, Eye, Edit, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Eye, Edit, Trash2, IndianRupee } from "lucide-react";
 import { toast } from "sonner";
 import AddScopeOfWorkDialog from "@/components/projects/AddScopeOfWorkDialog";
 import { BillingProject } from "@/features/billing/types/billingTypes";
@@ -46,6 +46,17 @@ const ProjectDetailPage = () => {
       default:
         return <Badge variant="outline">Unknown</Badge>;
     }
+  };
+
+  const getVendorPaymentStatus = () => {
+    if (!project) return { totalVendors: 0, paidVendors: 0, pendingAmount: 0 };
+    
+    // Mock vendor payment data - in a real app this would come from actual vendor data
+    const totalVendors = Math.max(1, Math.floor(project.workPlan.length * 1.5));
+    const paidVendors = Math.floor(totalVendors * (project.totalReceived / project.totalCost));
+    const pendingAmount = project.totalPending * 0.6; // Assume 60% of pending is for vendors
+    
+    return { totalVendors, paidVendors, pendingAmount };
   };
 
   const handleScopeAdded = () => {
@@ -87,6 +98,8 @@ const ProjectDetailPage = () => {
       </div>
     );
   }
+
+  const vendorPaymentStatus = getVendorPaymentStatus();
 
   return (
     <>
@@ -133,6 +146,40 @@ const ProjectDetailPage = () => {
               <div className="flex items-center gap-4">
                 <Progress value={calculateProgress()} className="flex-1" />
                 <span className="text-sm font-medium">{calculateProgress()}%</span>
+              </div>
+            </div>
+
+            {/* Vendor Payment Status Section */}
+            <div className="mt-6">
+              <h4 className="font-medium mb-4 flex items-center gap-2">
+                <IndianRupee className="h-4 w-4" />
+                Vendor Payment Status
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-4 border rounded-lg bg-blue-50">
+                  <h5 className="text-sm font-medium text-muted-foreground">Total Vendors</h5>
+                  <p className="text-2xl font-bold text-blue-600">{vendorPaymentStatus.totalVendors}</p>
+                </div>
+                <div className="p-4 border rounded-lg bg-green-50">
+                  <h5 className="text-sm font-medium text-muted-foreground">Paid Vendors</h5>
+                  <p className="text-2xl font-bold text-green-600">{vendorPaymentStatus.paidVendors}</p>
+                </div>
+                <div className="p-4 border rounded-lg bg-red-50">
+                  <h5 className="text-sm font-medium text-muted-foreground">Pending Vendor Payments</h5>
+                  <p className="text-2xl font-bold text-red-600">₹{Math.round(vendorPaymentStatus.pendingAmount).toLocaleString()}</p>
+                </div>
+              </div>
+              <div className="mt-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-muted-foreground">Vendor Payment Progress</span>
+                  <span className="text-sm font-medium">
+                    {vendorPaymentStatus.totalVendors > 0 ? Math.round((vendorPaymentStatus.paidVendors / vendorPaymentStatus.totalVendors) * 100) : 0}%
+                  </span>
+                </div>
+                <Progress 
+                  value={vendorPaymentStatus.totalVendors > 0 ? (vendorPaymentStatus.paidVendors / vendorPaymentStatus.totalVendors) * 100 : 0} 
+                  className="h-2" 
+                />
               </div>
             </div>
 
