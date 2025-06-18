@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,7 +8,6 @@ import { toast } from "sonner";
 import AddExpenseForm from "@/features/expenses/components/AddExpenseForm";
 import ExpensesList from "@/features/expenses/components/ExpensesList";
 import MonthlyStatements from "@/features/expenses/components/MonthlyStatements";
-import AccountingStatement from "@/features/expenses/components/AccountingStatement";
 import ExcelImportExport from "@/features/expenses/components/ExcelImportExport";
 import { ExpenseItem } from "@/features/expenses/types/expenseTypes";
 
@@ -97,11 +95,10 @@ const Expenses = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="project">Project Expenses</TabsTrigger>
           <TabsTrigger value="other">Other Expenses</TabsTrigger>
           <TabsTrigger value="statements">Monthly Statements</TabsTrigger>
-          <TabsTrigger value="accounting">Accounting Statement</TabsTrigger>
         </TabsList>
 
         <TabsContent value="project" className="space-y-6">
@@ -202,10 +199,6 @@ const Expenses = () => {
 
         <TabsContent value="statements" className="space-y-6">
           <MonthlyStatements refreshTrigger={refreshTrigger} />
-        </TabsContent>
-
-        <TabsContent value="accounting" className="space-y-6">
-          <AccountingStatement refreshTrigger={refreshTrigger} />
         </TabsContent>
       </Tabs>
 
