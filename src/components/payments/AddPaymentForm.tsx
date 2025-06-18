@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { DatePicker } from "@/components/ui/date-picker";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { 
   Form, 
   FormControl, 
@@ -50,6 +52,7 @@ const formSchema = z.object({
   payableAmount: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
     message: "Payable amount must be a positive number",
   }),
+  payablePercentage: z.string().optional(),
   description: z.string().optional(),
   paymentStatus: z.string({ required_error: "Please select a payment status" }),
   transportStatus: z.string().optional(),
@@ -61,6 +64,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 const AddPaymentForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPercentageMode, setIsPercentageMode] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -69,12 +73,39 @@ const AddPaymentForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       vendorId: "",
       amount: "",
       payableAmount: "",
+      payablePercentage: "",
       description: "",
       paymentStatus: "unpaid",
       transportStatus: "not-applicable",
       invoice: "",
     },
   });
+
+  const watchAmount = form.watch("amount");
+  const watchPayablePercentage = form.watch("payablePercentage");
+
+  // Calculate payable amount when percentage changes
+  const handlePercentageChange = (percentage: string) => {
+    if (isPercentageMode && watchAmount && percentage) {
+      const totalAmount = Number(watchAmount);
+      const percentageValue = Number(percentage);
+      
+      if (!isNaN(totalAmount) && !isNaN(percentageValue) && percentageValue >= 0 && percentageValue <= 100) {
+        const calculatedAmount = (totalAmount * percentageValue) / 100;
+        form.setValue("payableAmount", calculatedAmount.toString());
+      }
+    }
+  };
+
+  // Toggle between percentage and amount mode
+  const handleToggleMode = (checked: boolean) => {
+    setIsPercentageMode(checked);
+    if (!checked) {
+      form.setValue("payablePercentage", "");
+    } else {
+      form.setValue("payableAmount", "");
+    }
+  };
 
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
@@ -85,6 +116,7 @@ const AddPaymentForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       
       toast.success("Payment record added successfully");
       form.reset();
+      setIsPercentageMode(false);
       
       if (onSuccess) {
         onSuccess();
@@ -167,19 +199,63 @@ const AddPaymentForm = ({ onSuccess }: { onSuccess?: () => void }) => {
             )}
           />
           
-          <FormField
-            control={form.control}
-            name="payableAmount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Payable Amount (₹)</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter payable amount" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label>Payable Amount (₹)</Label>
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="percentage-mode" className="text-sm">Percentage Mode</Label>
+                <Switch
+                  id="percentage-mode"
+                  checked={isPercentageMode}
+                  onCheckedChange={handleToggleMode}
+                />
+              </div>
+            </div>
+            
+            {isPercentageMode ? (
+              <FormField
+                control={form.control}
+                name="payablePercentage"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <div className="relative">
+                        <Input 
+                          placeholder="Enter percentage" 
+                          {...field} 
+                          onChange={(e) => {
+                            field.onChange(e);
+                            handlePercentageChange(e.target.value);
+                          }}
+                        />
+                        <span className="absolute right-3 top-2.5 text-muted-foreground">%</span>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ) : (
+              <FormField
+                control={form.control}
+                name="payableAmount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input placeholder="Enter payable amount" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
-          />
+            
+            {isPercentageMode && watchAmount && watchPayablePercentage && (
+              <div className="text-sm text-muted-foreground">
+                Calculated Amount: ₹{((Number(watchAmount) * Number(watchPayablePercentage)) / 100).toLocaleString()}
+              </div>
+            )}
+          </div>
         </div>
         
         <FormField
