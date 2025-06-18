@@ -102,9 +102,9 @@ const AccountingStatement = ({ refreshTrigger }: AccountingStatementProps) => {
       });
     });
 
-    // Calculate totals
-    const totalDebit = entries.reduce((sum, entry) => sum + entry.debit, 0);
-    const totalCredit = entries.reduce((sum, entry) => sum + entry.credit, 0);
+    // Calculate totals - excluding opening balance
+    const totalDebit = entries.reduce((sum, entry) => entry.id !== 'opening' ? sum + entry.debit : sum, 0);
+    const totalCredit = entries.reduce((sum, entry) => entry.id !== 'opening' ? sum + entry.credit : sum, 0);
 
     // Add totals row
     entries.push({
@@ -221,13 +221,13 @@ const AccountingStatement = ({ refreshTrigger }: AccountingStatementProps) => {
           <div className="bg-red-50 p-4 rounded-lg text-center">
             <h3 className="text-sm font-medium text-red-800">Total Debits (Spent)</h3>
             <p className="text-xl font-bold text-red-600">
-              ₹{statementEntries.reduce((sum, entry) => sum + entry.debit, 0).toLocaleString()}
+              ₹{statementEntries.reduce((sum, entry) => entry.id !== 'opening' ? sum + entry.debit : sum, 0).toLocaleString()}
             </p>
           </div>
           <div className="bg-green-50 p-4 rounded-lg text-center">
             <h3 className="text-sm font-medium text-green-800">Total Credits (Received)</h3>
             <p className="text-xl font-bold text-green-600">
-              ₹{statementEntries.reduce((sum, entry) => sum + entry.credit, 0).toLocaleString()}
+              ₹{statementEntries.reduce((sum, entry) => entry.id !== 'opening' ? sum + entry.credit : sum, 0).toLocaleString()}
             </p>
           </div>
           <div className={`p-4 rounded-lg text-center ${
