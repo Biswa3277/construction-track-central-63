@@ -153,58 +153,52 @@ const ExpensesList = ({ type, refreshTrigger }: ExpensesListProps) => {
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50">
-                <TableHead className="font-bold border-r min-w-[100px]">Date</TableHead>
-                <TableHead className="font-bold border-r min-w-[150px]">Description</TableHead>
-                <TableHead className="font-bold border-r min-w-[120px]">Category</TableHead>
-                {type === 'project' && <TableHead className="font-bold border-r min-w-[120px]">Project/Others</TableHead>}
-                <TableHead className="font-bold border-r min-w-[100px]">Type</TableHead>
-                <TableHead className="font-bold border-r min-w-[120px]">Payment Method</TableHead>
-                <TableHead className="font-bold border-r min-w-[120px]">Person Name</TableHead>
-                <TableHead className="font-bold border-r min-w-[100px]">Bill Available</TableHead>
-                <TableHead className="font-bold border-r text-center min-w-[100px]">Debit</TableHead>
-                <TableHead className="font-bold border-r text-center min-w-[100px]">Credit</TableHead>
-                <TableHead className="font-bold border-r text-center min-w-[100px]">Balance</TableHead>
-                <TableHead className="font-bold text-center min-w-[80px]">Actions</TableHead>
+                <TableHead className="font-bold border-r min-w-[100px] h-8 py-2">Date</TableHead>
+                <TableHead className="font-bold border-r min-w-[150px] h-8 py-2">Description</TableHead>
+                <TableHead className="font-bold border-r min-w-[120px] h-8 py-2">Category</TableHead>
+                {type === 'project' && <TableHead className="font-bold border-r min-w-[120px] h-8 py-2">Project/Others</TableHead>}
+                <TableHead className="font-bold border-r min-w-[120px] h-8 py-2">Payment Method</TableHead>
+                <TableHead className="font-bold border-r min-w-[120px] h-8 py-2">Person Name</TableHead>
+                <TableHead className="font-bold border-r min-w-[100px] h-8 py-2">Bill Available</TableHead>
+                <TableHead className="font-bold border-r text-center min-w-[100px] h-8 py-2">Debit</TableHead>
+                <TableHead className="font-bold border-r text-center min-w-[100px] h-8 py-2">Credit</TableHead>
+                <TableHead className="font-bold border-r text-center min-w-[100px] h-8 py-2">Balance</TableHead>
+                <TableHead className="font-bold text-center min-w-[80px] h-8 py-2">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredExpenses.map((expense) => (
-                <TableRow key={expense.id}>
-                  <TableCell className="border-r">{new Date(expense.date).toLocaleDateString()}</TableCell>
-                  <TableCell className="border-r max-w-xs truncate">{expense.description}</TableCell>
-                  <TableCell className="border-r">{expense.category}</TableCell>
-                  {type === 'project' && <TableCell className="border-r">{expense.projectName || 'Others'}</TableCell>}
-                  <TableCell className="border-r">
-                    <Badge variant={expense.transactionType === 'spent' ? 'destructive' : 'default'}>
-                      {expense.transactionType === 'received' ? 'Received' : 'Spent'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="border-r">{expense.paymentMethod}</TableCell>
-                  <TableCell className="border-r">{expense.personName || '-'}</TableCell>
-                  <TableCell className="border-r text-center">
+                <TableRow key={expense.id} className="h-10">
+                  <TableCell className="border-r py-2">{new Date(expense.date).toLocaleDateString()}</TableCell>
+                  <TableCell className="border-r max-w-xs truncate py-2">{expense.description}</TableCell>
+                  <TableCell className="border-r py-2">{expense.category}</TableCell>
+                  {type === 'project' && <TableCell className="border-r py-2">{expense.projectName || 'Others'}</TableCell>}
+                  <TableCell className="border-r py-2">{expense.paymentMethod}</TableCell>
+                  <TableCell className="border-r py-2">{expense.personName || '-'}</TableCell>
+                  <TableCell className="border-r text-center py-2">
                     {expense.billAvailable ? (
                       <Check className="h-4 w-4 text-green-600 mx-auto" />
                     ) : (
                       <X className="h-4 w-4 text-red-600 mx-auto" />
                     )}
                   </TableCell>
-                  <TableCell className="border-r text-right text-red-600">
+                  <TableCell className="border-r text-right text-red-600 py-2">
                     {formatAmount(expense.debit)}
                   </TableCell>
-                  <TableCell className="border-r text-right text-green-600">
+                  <TableCell className="border-r text-right text-green-600 py-2">
                     {formatAmount(expense.credit)}
                   </TableCell>
-                  <TableCell className={`border-r text-right font-semibold ${
+                  <TableCell className={`border-r text-right font-semibold py-2 ${
                     expense.balance < 0 ? 'text-red-600' : expense.balance > 0 ? 'text-green-600' : 'text-gray-600'
                   }`}>
                     {expense.balance.toFixed(2)}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-2">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => deleteExpense(expense.id)}
-                      className="text-red-600 hover:text-red-800"
+                      className="text-red-600 hover:text-red-800 h-8 w-8 p-0"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
