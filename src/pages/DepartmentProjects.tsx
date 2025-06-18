@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -215,7 +214,7 @@ const DepartmentProjects = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <h1 className="text-3xl font-bold">Department Projects</h1>
+        <h1 className="text-3xl font-bold">Projects & Tasks</h1>
       </div>
       
       {!selectedDepartment ? (

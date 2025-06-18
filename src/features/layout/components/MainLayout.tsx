@@ -34,7 +34,7 @@ const MainLayout = () => {
   const getPageTitle = () => {
     const path = location.pathname;
     if (path === "/dashboard") return "Dashboard";
-    if (path === "/department-projects") return "Department Projects";
+    if (path === "/department-projects") return "Projects & Tasks";
     if (path === "/payments") return "Payments";
     if (path === "/project-billing") return "Project Billing";
     if (path === "/purchase-billing") return "Purchase and Invoice";

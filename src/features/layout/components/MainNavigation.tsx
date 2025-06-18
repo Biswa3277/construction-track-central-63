@@ -1,4 +1,3 @@
-
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
@@ -36,7 +35,7 @@ const MainNavigation = ({ user }: MainNavigationProps) => {
 
   const navItems = [
     { icon: Home, label: "Dashboard", path: "/dashboard" },
-    { icon: Layers, label: "Department Projects", path: "/department-projects" },
+    { icon: Layers, label: "Projects & Tasks", path: "/department-projects" },
     { icon: FileText, label: "Payments", path: "/payments" },
     { icon: Calculator, label: "Project Billing", path: "/project-billing" },
     { icon: Receipt, label: "Purchase and Invoice", path: "/purchase-billing" },
