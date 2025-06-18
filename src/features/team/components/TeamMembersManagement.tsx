@@ -9,6 +9,7 @@ import { Plus, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { TeamMember, UserRole } from "../types/teamTypes";
 import AddTeamMemberForm from "./AddTeamMemberForm";
+import TeamMemberDashboard from "./TeamMemberDashboard";
 
 const generateTeamMembers = (): TeamMember[] => {
   return [
@@ -60,6 +61,7 @@ const TeamMembersManagement = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole | "all">("all");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const [showDashboard, setShowDashboard] = useState(false);
 
   useEffect(() => {
     const allMembers = generateTeamMembers();
@@ -121,6 +123,26 @@ const TeamMembersManagement = () => {
     applyFilters(allMembers);
   };
 
+  const handleMemberClick = (member: TeamMember) => {
+    setSelectedMember(member);
+    setShowDashboard(true);
+  };
+
+  const handleBackFromDashboard = () => {
+    setShowDashboard(false);
+    setSelectedMember(null);
+  };
+
+  // Show dashboard if a member is selected
+  if (showDashboard && selectedMember) {
+    return (
+      <TeamMemberDashboard 
+        member={selectedMember} 
+        onBack={handleBackFromDashboard}
+      />
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row gap-4">
@@ -151,7 +173,12 @@ const TeamMembersManagement = () => {
           <TableBody>
             {filteredMembers.map((member) => (
               <TableRow key={member.id}>
-                <TableCell className="font-medium">{member.name}</TableCell>
+                <TableCell 
+                  className="font-medium cursor-pointer text-blue-600 hover:text-blue-800"
+                  onClick={() => handleMemberClick(member)}
+                >
+                  {member.name}
+                </TableCell>
                 <TableCell>{member.email}</TableCell>
                 <TableCell>{getRoleBadge(member.role)}</TableCell>
                 <TableCell>{member.department}</TableCell>
@@ -165,9 +192,9 @@ const TeamMembersManagement = () => {
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    onClick={() => setSelectedMember(member)}
+                    onClick={() => handleMemberClick(member)}
                   >
-                    View Details
+                    View Dashboard
                   </Button>
                 </TableCell>
               </TableRow>
