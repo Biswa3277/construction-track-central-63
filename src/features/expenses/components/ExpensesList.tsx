@@ -63,7 +63,7 @@ const ExpensesList = ({ type, refreshTrigger }: ExpensesListProps) => {
     // Sort by date
     const sortedExpenses = filtered.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    // Calculate running balance
+    // Calculate running balance correctly
     let runningBalance = 0;
     const expensesWithBalance: ExpenseWithBalance[] = sortedExpenses.map((expense) => {
       let debit = 0;
@@ -71,10 +71,10 @@ const ExpensesList = ({ type, refreshTrigger }: ExpensesListProps) => {
 
       if (expense.transactionType === 'spent') {
         debit = expense.amount;
-        runningBalance -= expense.amount;
+        runningBalance -= expense.amount; // Subtract debit from balance
       } else if (expense.transactionType === 'received' || expense.transactionType === 'total_received') {
         credit = expense.amount;
-        runningBalance += expense.amount;
+        runningBalance += expense.amount; // Add credit to balance
       }
 
       return {

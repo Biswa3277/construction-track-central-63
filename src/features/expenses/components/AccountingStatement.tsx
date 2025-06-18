@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -85,10 +84,10 @@ const AccountingStatement = ({ refreshTrigger }: AccountingStatementProps) => {
 
       if (expense.transactionType === 'spent') {
         debit = expense.amount;
-        runningBalance -= expense.amount;
+        runningBalance -= expense.amount; // Subtract debit from balance
       } else if (expense.transactionType === 'received' || expense.transactionType === 'total_received') {
         credit = expense.amount;
-        runningBalance += expense.amount;
+        runningBalance += expense.amount; // Add credit to balance
       }
 
       entries.push({
