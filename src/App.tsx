@@ -22,6 +22,7 @@ import Settings from "@/pages/Settings";
 import UserManagementPage from "@/features/users/pages/UserManagementPage";
 import PaymentDetailView from "@/features/payments/components/PaymentDetailView";
 import TeamManagement from "@/pages/TeamManagement";
+import TeamMemberDashboardPage from "@/pages/TeamMemberDashboard";
 import ThingsToDo from "@/pages/ThingsToDo";
 import NotFound from "@/pages/NotFound";
 
@@ -53,6 +54,7 @@ const App = () => {
               <Route path="expenses" element={<Expenses />} />
               <Route path="billing" element={<Billing />} />
               <Route path="team-management" element={<TeamManagement />} />
+              <Route path="team-member/:memberId" element={<TeamMemberDashboardPage />} />
               <Route path="reports" element={<ReportsPage />} />
               <Route path="settings" element={<Settings />} />
               <Route path="user-management" element={<UserManagementPage />} />

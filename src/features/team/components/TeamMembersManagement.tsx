@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +10,6 @@ import { Plus, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { TeamMember, UserRole } from "../types/teamTypes";
 import AddTeamMemberForm from "./AddTeamMemberForm";
-import TeamMemberDashboard from "./TeamMemberDashboard";
 
 const generateTeamMembers = (): TeamMember[] => {
   return [
@@ -55,13 +55,12 @@ const generateTeamMembers = (): TeamMember[] => {
 };
 
 const TeamMembersManagement = () => {
+  const navigate = useNavigate();
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<TeamMember[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRole, setSelectedRole] = useState<UserRole | "all">("all");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
-  const [showDashboard, setShowDashboard] = useState(false);
 
   useEffect(() => {
     const allMembers = generateTeamMembers();
@@ -124,24 +123,8 @@ const TeamMembersManagement = () => {
   };
 
   const handleMemberClick = (member: TeamMember) => {
-    setSelectedMember(member);
-    setShowDashboard(true);
+    navigate(`/team-member/${member.id}`);
   };
-
-  const handleBackFromDashboard = () => {
-    setShowDashboard(false);
-    setSelectedMember(null);
-  };
-
-  // Show dashboard if a member is selected
-  if (showDashboard && selectedMember) {
-    return (
-      <TeamMemberDashboard 
-        member={selectedMember} 
-        onBack={handleBackFromDashboard}
-      />
-    );
-  }
 
   return (
     <div className="space-y-4">
