@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,6 +9,7 @@ import AddExpenseForm from "@/features/expenses/components/AddExpenseForm";
 import ExpensesList from "@/features/expenses/components/ExpensesList";
 import MonthlyStatements from "@/features/expenses/components/MonthlyStatements";
 import ExcelImportExport from "@/features/expenses/components/ExcelImportExport";
+import AccountingStatement from "@/features/expenses/components/AccountingStatement";
 
 const Expenses = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -40,11 +40,16 @@ const Expenses = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="statement">Statement View</TabsTrigger>
           <TabsTrigger value="project">Project Expenses</TabsTrigger>
           <TabsTrigger value="other">Other Expenses</TabsTrigger>
           <TabsTrigger value="statements">Monthly Statements</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="statement" className="space-y-6">
+          <AccountingStatement refreshTrigger={refreshTrigger} />
+        </TabsContent>
 
         <TabsContent value="project" className="space-y-6">
           <Card>
