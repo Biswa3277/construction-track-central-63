@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -60,8 +59,6 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
     description: '',
     location: '',
     priority: 'medium' as 'low' | 'medium' | 'high',
-    startTime: '',
-    endTime: '',
     status: 'planned' as 'planned' | 'completed' | 'leave'
   });
   const [newTodo, setNewTodo] = useState({
@@ -99,8 +96,6 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
           description: existingPlan.description,
           location: existingPlan.location,
           priority: existingPlan.priority,
-          startTime: existingPlan.startTime || '',
-          endTime: existingPlan.endTime || '',
           status: existingPlan.status
         });
         setIsEditing(false);
@@ -111,8 +106,6 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
           description: '',
           location: '',
           priority: 'medium',
-          startTime: '',
-          endTime: '',
           status: 'planned'
         });
         setIsEditing(true);
@@ -122,6 +115,32 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
       setIsEditing(false);
     }
   }, [selectedDates, workPlans]);
+
+  // Handle keyboard events for deselection
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setSelectedDates([]);
+        setSelectedWorkPlan(null);
+        setIsEditing(false);
+      }
+    };
+
+    const handleContextMenu = (event: MouseEvent) => {
+      event.preventDefault();
+      setSelectedDates([]);
+      setSelectedWorkPlan(null);
+      setIsEditing(false);
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('contextmenu', handleContextMenu);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('contextmenu', handleContextMenu);
+    };
+  }, []);
 
   const getDateStatus = (date: Date) => {
     const dateStr = date.toISOString().split('T')[0];
@@ -138,23 +157,32 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
     return workPlans.find(wp => dateStr >= wp.startDate && dateStr <= wp.endDate);
   };
 
-  const handleDateSelect = (date: Date | undefined) => {
+  const handleDateSelect = useCallback((date: Date | undefined, event?: React.MouseEvent) => {
     if (!date) return;
 
+    const isCtrlPressed = event?.ctrlKey || event?.metaKey;
+    const isShiftPressed = event?.shiftKey;
     const isAlreadySelected = selectedDates.some(d => d.toDateString() === date.toDateString());
     
-    if (isAlreadySelected) {
-      // Remove date from selection
+    if (isAlreadySelected && (isCtrlPressed || isShiftPressed)) {
+      // Remove date from selection with Ctrl/Shift
       setSelectedDates(selectedDates.filter(d => d.toDateString() !== date.toDateString()));
-    } else {
-      // Add date to selection (max 6 days)
+    } else if (isCtrlPressed || isShiftPressed) {
+      // Add date to selection with Ctrl/Shift (max 6 days)
       if (selectedDates.length < 6) {
         setSelectedDates([...selectedDates, date].sort((a, b) => a.getTime() - b.getTime()));
       } else {
         toast.error("Maximum 6 days can be selected at once");
       }
+    } else {
+      // Single selection without modifiers
+      if (isAlreadySelected) {
+        setSelectedDates([]);
+      } else {
+        setSelectedDates([date]);
+      }
     }
-  };
+  }, [selectedDates]);
 
   const handleSaveWorkPlan = () => {
     if (selectedDates.length === 0 || !workPlanForm.title) {
@@ -333,14 +361,19 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
               <Card>
                 <CardHeader>
                   <CardTitle>Calendar</CardTitle>
-                  <CardDescription>Select dates to plan work activities (max 6 days)</CardDescription>
+                  <CardDescription>
+                    Hold Ctrl/Shift and click to select multiple dates (max 6 days). 
+                    Right-click or press ESC to clear selection.
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <TooltipProvider>
                     <Calendar
                       mode="single"
                       selected={undefined}
-                      onSelect={handleDateSelect}
+                      onSelect={(date, selectedDay, activeModifiers, e) => {
+                        handleDateSelect(date, e as React.MouseEvent);
+                      }}
                       month={currentMonth}
                       onMonthChange={setCurrentMonth}
                       className="rounded-md border w-full"
@@ -360,12 +393,35 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
                         Day: ({ date, ...props }) => {
                           const workPlan = getDateWorkPlan(date);
                           const isSelected = selectedDates.some(d => d.toDateString() === date.toDateString());
+                          const status = getDateStatus(date);
                           
+                          let backgroundColor = '';
+                          let textColor = '';
+                          
+                          if (isSelected) {
+                            backgroundColor = '#3b82f6';
+                            textColor = '#ffffff';
+                          } else if (status === 'has-plan') {
+                            backgroundColor = '#dcfce7';
+                            textColor = '#166534';
+                          } else if (status === 'leave') {
+                            backgroundColor = '#e5e7eb';
+                            textColor = '#6b7280';
+                          } else if (status === 'no-plan') {
+                            backgroundColor = '#fecaca';
+                            textColor = '#dc2626';
+                          }
+
                           const dayElement = (
                             <button 
                               {...props}
-                              onClick={() => handleDateSelect(date)}
-                              className={`h-9 w-9 p-0 font-normal hover:bg-accent hover:text-accent-foreground ${isSelected ? 'bg-primary text-primary-foreground' : ''}`}
+                              onClick={(e) => handleDateSelect(date, e)}
+                              onContextMenu={(e) => {
+                                e.preventDefault();
+                                setSelectedDates([]);
+                              }}
+                              className="h-9 w-9 p-0 font-normal hover:bg-accent hover:text-accent-foreground border-0 rounded-md"
+                              style={{ backgroundColor, color: textColor }}
                             >
                               {date.getDate()}
                             </button>
@@ -386,6 +442,9 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
                                         {workPlan.location}
                                       </p>
                                     )}
+                                    <p className="text-sm">
+                                      Status: {workPlan.status}
+                                    </p>
                                   </div>
                                 </TooltipContent>
                               </Tooltip>
@@ -398,7 +457,7 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
                     />
                   </TooltipProvider>
                   
-                  <div className="flex gap-2 mt-4 text-sm">
+                  <div className="flex gap-2 mt-4 text-sm flex-wrap">
                     <div className="flex items-center gap-1">
                       <div className="w-4 h-4 bg-green-200 rounded"></div>
                       <span>Has Work Plan</span>
@@ -478,23 +537,21 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="start-time">Start Time</Label>
+                          <Label htmlFor="start-date">Start Date</Label>
                           <Input
-                            id="start-time"
-                            type="time"
-                            value={workPlanForm.startTime}
-                            onChange={(e) => setWorkPlanForm({ ...workPlanForm, startTime: e.target.value })}
-                            disabled={!isEditing}
+                            id="start-date"
+                            value={selectedDates.length > 0 ? format(selectedDates[0], 'yyyy-MM-dd') : ''}
+                            disabled
+                            className="bg-gray-100"
                           />
                         </div>
                         <div>
-                          <Label htmlFor="end-time">End Time</Label>
+                          <Label htmlFor="end-date">End Date</Label>
                           <Input
-                            id="end-time"
-                            type="time"
-                            value={workPlanForm.endTime}
-                            onChange={(e) => setWorkPlanForm({ ...workPlanForm, endTime: e.target.value })}
-                            disabled={!isEditing}
+                            id="end-date"
+                            value={selectedDates.length > 0 ? format(selectedDates[selectedDates.length - 1], 'yyyy-MM-dd') : ''}
+                            disabled
+                            className="bg-gray-100"
                           />
                         </div>
                       </div>
@@ -576,11 +633,6 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
                             <span className="font-medium">Status:</span>
                             {getStatusBadge(selectedWorkPlan.status)}
                           </div>
-                          {selectedWorkPlan.startTime && selectedWorkPlan.endTime && (
-                            <p className="text-sm text-muted-foreground">
-                              Time: {selectedWorkPlan.startTime} - {selectedWorkPlan.endTime}
-                            </p>
-                          )}
                           <p className="text-sm text-muted-foreground">
                             Duration: {format(new Date(selectedWorkPlan.startDate), 'MMM dd')} - {format(new Date(selectedWorkPlan.endDate), 'MMM dd')}
                           </p>
@@ -589,7 +641,8 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
                     </div>
                   ) : (
                     <p className="text-center text-muted-foreground py-8">
-                      Select dates from the calendar to create work plans
+                      Select dates from the calendar to create work plans.<br />
+                      <span className="text-xs">Use Ctrl/Shift + click for multiple dates</span>
                     </p>
                   )}
                 </CardContent>
@@ -609,7 +662,6 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
                       <TableHead>Title</TableHead>
                       <TableHead>Duration</TableHead>
                       <TableHead>Location</TableHead>
-                      <TableHead>Time</TableHead>
                       <TableHead>Priority</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Actions</TableHead>
@@ -623,12 +675,6 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
                           {format(new Date(workPlan.startDate), 'MMM dd')} - {format(new Date(workPlan.endDate), 'MMM dd')}
                         </TableCell>
                         <TableCell>{workPlan.location || '-'}</TableCell>
-                        <TableCell>
-                          {workPlan.startTime && workPlan.endTime 
-                            ? `${workPlan.startTime} - ${workPlan.endTime}`
-                            : '-'
-                          }
-                        </TableCell>
                         <TableCell>{getPriorityBadge(workPlan.priority)}</TableCell>
                         <TableCell>{getStatusBadge(workPlan.status)}</TableCell>
                         <TableCell>
@@ -647,8 +693,6 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
                                   description: workPlan.description,
                                   location: workPlan.location,
                                   priority: workPlan.priority,
-                                  startTime: workPlan.startTime || '',
-                                  endTime: workPlan.endTime || '',
                                   status: workPlan.status
                                 });
                                 setIsEditing(true);
@@ -672,7 +716,7 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
                     ))}
                     {getMonthWorkPlans().length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                        <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                           No work plans for this month
                         </TableCell>
                       </TableRow>
