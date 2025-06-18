@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Plus, MapPin, Clock, CheckCircle, Calendar as CalendarIcon } from "lucide-react";
 import { TeamMember } from "../types/teamTypes";
 import { toast } from "sonner";
@@ -169,156 +171,157 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
         </div>
       </div>
 
-      {/* Section Headers */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="flex items-center gap-2 mb-2">
-          <CalendarIcon className="h-6 w-6 text-blue-600" />
-          <h2 className="text-xl font-semibold">Report Calendar</h2>
-        </div>
-        <div className="flex items-center gap-2 mb-2">
-          <CheckCircle className="h-6 w-6 text-green-600" />
-          <h2 className="text-xl font-semibold">Things To Do</h2>
-        </div>
-      </div>
+      <Tabs defaultValue="calendar" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="calendar" className="flex items-center gap-2">
+            <CalendarIcon className="h-4 w-4" />
+            Report Calendar
+          </TabsTrigger>
+          <TabsTrigger value="todos" className="flex items-center gap-2">
+            <CheckCircle className="h-4 w-4" />
+            Things To Do
+          </TabsTrigger>
+        </TabsList>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Work Calendar Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              Work Calendar
-            </CardTitle>
-            <CardDescription>Plan daily work activities and track completion</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <Calendar
-                mode="single"
-                selected={selectedDate || undefined}
-                onSelect={setSelectedDate}
-                className="rounded-md border"
-                modifiers={{
-                  'has-plan': (date) => getDateStatus(date) === 'has-plan',
-                  'no-plan': (date) => getDateStatus(date) === 'no-plan' && date <= new Date()
-                }}
-                modifiersStyles={{
-                  'has-plan': { backgroundColor: '#dcfce7', color: '#166534' },
-                  'no-plan': { backgroundColor: '#fecaca', color: '#dc2626' }
-                }}
-              />
-              
-              <div className="flex gap-2">
-                <div className="flex items-center gap-1">
-                  <div className="w-4 h-4 bg-green-200 rounded"></div>
-                  <span className="text-sm">Has Work Plan</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-4 h-4 bg-red-200 rounded"></div>
-                  <span className="text-sm">No Work Plan</span>
-                </div>
-              </div>
-
-              {selectedDate && (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium">
-                      Plans for {selectedDate.toLocaleDateString()}
-                    </h4>
-                    <Button size="sm" onClick={() => setIsAddWorkPlanOpen(true)}>
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add Plan
-                    </Button>
+        <TabsContent value="calendar" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Work Calendar
+              </CardTitle>
+              <CardDescription>Plan daily work activities and track completion</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate || undefined}
+                  onSelect={setSelectedDate}
+                  className="rounded-md border w-full"
+                  modifiers={{
+                    'has-plan': (date) => getDateStatus(date) === 'has-plan',
+                    'no-plan': (date) => getDateStatus(date) === 'no-plan' && date <= new Date()
+                  }}
+                  modifiersStyles={{
+                    'has-plan': { backgroundColor: '#dcfce7', color: '#166534' },
+                    'no-plan': { backgroundColor: '#fecaca', color: '#dc2626' }
+                  }}
+                />
+                
+                <div className="flex gap-2">
+                  <div className="flex items-center gap-1">
+                    <div className="w-4 h-4 bg-green-200 rounded"></div>
+                    <span className="text-sm">Has Work Plan</span>
                   </div>
-
-                  {getSelectedDateWorkPlans().map((plan) => (
-                    <div key={plan.id} className="p-3 border rounded-lg space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h5 className="font-medium">{plan.title}</h5>
-                        {getPriorityBadge(plan.priority)}
-                      </div>
-                      <p className="text-sm text-muted-foreground">{plan.description}</p>
-                      {plan.location && (
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <MapPin className="h-3 w-3" />
-                          {plan.location}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-
-                  {getSelectedDateWorkPlans().length === 0 && (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      No work plans for this date
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Things To Do Section */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5" />
-                  Things To Do
-                </CardTitle>
-                <CardDescription>Track tasks and progress</CardDescription>
-              </div>
-              <Button size="sm" onClick={() => setIsAddTodoOpen(true)}>
-                <Plus className="h-4 w-4 mr-1" />
-                Add Task
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {todos.map((todo) => (
-                <div key={todo.id} className="p-4 border rounded-lg space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h5 className="font-medium">{todo.title}</h5>
-                    {getPriorityBadge(todo.priority)}
+                  <div className="flex items-center gap-1">
+                    <div className="w-4 h-4 bg-red-200 rounded"></div>
+                    <span className="text-sm">No Work Plan</span>
                   </div>
-                  
-                  <p className="text-sm text-muted-foreground">{todo.description}</p>
-                  
-                  <div className="space-y-2">
+                </div>
+
+                {selectedDate && (
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm">Progress</span>
-                      <span className="text-sm font-medium">{todo.progress}%</span>
+                      <h4 className="font-medium">
+                        Plans for {selectedDate.toLocaleDateString()}
+                      </h4>
+                      <Button size="sm" onClick={() => setIsAddWorkPlanOpen(true)}>
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add Plan
+                      </Button>
                     </div>
-                    <Progress value={todo.progress} className="h-2" />
+
+                    {getSelectedDateWorkPlans().map((plan) => (
+                      <div key={plan.id} className="p-3 border rounded-lg space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h5 className="font-medium">{plan.title}</h5>
+                          {getPriorityBadge(plan.priority)}
+                        </div>
+                        <p className="text-sm text-muted-foreground">{plan.description}</p>
+                        {plan.location && (
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <MapPin className="h-3 w-3" />
+                            {plan.location}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+
+                    {getSelectedDateWorkPlans().length === 0 && (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        No work plans for this date
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="todos" className="mt-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5" />
+                    Things To Do
+                  </CardTitle>
+                  <CardDescription>Track tasks and progress</CardDescription>
+                </div>
+                <Button size="sm" onClick={() => setIsAddTodoOpen(true)}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add Task
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {todos.map((todo) => (
+                  <div key={todo.id} className="p-4 border rounded-lg space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h5 className="font-medium">{todo.title}</h5>
+                      {getPriorityBadge(todo.priority)}
+                    </div>
                     
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        min="0"
-                        max="100"
-                        value={todo.progress}
-                        onChange={(e) => updateTodoProgress(todo.id, parseInt(e.target.value) || 0)}
-                        className="w-20"
-                      />
-                      <span className="text-sm text-muted-foreground">
-                        Due: {new Date(todo.dueDate).toLocaleDateString()}
-                      </span>
+                    <p className="text-sm text-muted-foreground">{todo.description}</p>
+                    
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Progress</span>
+                        <span className="text-sm font-medium">{todo.progress}%</span>
+                      </div>
+                      <Progress value={todo.progress} className="h-2" />
+                      
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={todo.progress}
+                          onChange={(e) => updateTodoProgress(todo.id, parseInt(e.target.value) || 0)}
+                          className="w-20"
+                        />
+                        <span className="text-sm text-muted-foreground">
+                          Due: {new Date(todo.dueDate).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
 
-              {todos.length === 0 && (
-                <p className="text-center text-muted-foreground py-8">
-                  No tasks yet. Add your first task to get started.
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                {todos.length === 0 && (
+                  <p className="text-center text-muted-foreground py-8">
+                    No tasks yet. Add your first task to get started.
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Add Work Plan Dialog */}
       <Dialog open={isAddWorkPlanOpen} onOpenChange={setIsAddWorkPlanOpen}>
