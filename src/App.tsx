@@ -8,7 +8,6 @@ import MainLayout from "@/features/layout/components/MainLayout";
 import LoginPage from "@/features/auth/components/LoginPage";
 import Dashboard from "@/pages/Dashboard";
 import Projects from "@/pages/Projects";
-import ProjectDashboard from "@/pages/ProjectDashboard";
 import ProjectDetailPage from "@/pages/ProjectDetailPage";
 import DepartmentProjects from "@/pages/DepartmentProjects";
 import Payments from "@/pages/Payments";
@@ -42,7 +41,7 @@ const App = () => {
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="projects" element={<Projects />} />
               <Route path="project/:id" element={<ProjectDetailPage />} />
-              <Route path="project-dashboard" element={<ProjectDashboard />} />
+              <Route path="project-dashboard" element={<Navigate to="/dashboard" replace />} />
               <Route path="department-projects" element={<DepartmentProjects />} />
               <Route path="things-to-do" element={<ThingsToDo />} />
               <Route path="payments" element={<Payments />} />
