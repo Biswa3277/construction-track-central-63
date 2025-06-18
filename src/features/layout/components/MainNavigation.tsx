@@ -1,3 +1,4 @@
+
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,8 @@ import {
   Receipt,
   UsersRound,
   Wallet,
-  Calculator
+  Calculator,
+  ListTodo
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -37,6 +39,7 @@ const MainNavigation = ({ user }: MainNavigationProps) => {
     { icon: Home, label: "Dashboard", path: "/dashboard" },
     { icon: BarChart3, label: "Project Dashboard", path: "/project-dashboard" },
     { icon: Layers, label: "Projects & Tasks", path: "/department-projects" },
+    { icon: ListTodo, label: "Things To Do", path: "/things-to-do" },
     { icon: FileText, label: "Payments", path: "/payments" },
     { icon: Calculator, label: "Project Billing", path: "/project-billing" },
     { icon: Receipt, label: "Purchase and Invoice", path: "/purchase-billing" },

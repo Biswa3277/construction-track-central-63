@@ -23,6 +23,7 @@ import Settings from "@/pages/Settings";
 import UserManagementPage from "@/features/users/pages/UserManagementPage";
 import PaymentDetailView from "@/features/payments/components/PaymentDetailView";
 import TeamManagement from "@/pages/TeamManagement";
+import ThingsToDo from "@/pages/ThingsToDo";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => {
               <Route path="project/:id" element={<ProjectDetailPage />} />
               <Route path="project-dashboard" element={<ProjectDashboard />} />
               <Route path="department-projects" element={<DepartmentProjects />} />
+              <Route path="things-to-do" element={<ThingsToDo />} />
               <Route path="payments" element={<Payments />} />
               <Route path="payments/:id" element={<PaymentDetailView />} />
               <Route path="project-billing" element={<ProjectBilling />} />
