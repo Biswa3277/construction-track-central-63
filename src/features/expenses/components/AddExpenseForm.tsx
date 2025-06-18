@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,6 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -26,6 +28,8 @@ const expenseSchema = z.object({
   transactionType: z.enum(["received", "spent", "total_received"]),
   date: z.date(),
   paymentMethod: z.string().min(1, "Payment method is required"),
+  personName: z.string().optional(),
+  billAvailable: z.boolean().default(false),
 });
 
 type ExpenseFormData = z.infer<typeof expenseSchema>;
@@ -53,6 +57,7 @@ const AddExpenseForm = ({ onSuccess, defaultType = 'project' }: AddExpenseFormPr
       type: defaultType,
       transactionType: "spent",
       date: new Date(),
+      billAvailable: false,
     },
   });
 
@@ -76,6 +81,8 @@ const AddExpenseForm = ({ onSuccess, defaultType = 'project' }: AddExpenseFormPr
         amount: data.amount,
         transactionType: data.transactionType,
         paymentMethod: data.paymentMethod,
+        personName: data.personName,
+        billAvailable: data.billAvailable,
         date: data.date.toISOString().split('T')[0],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -199,6 +206,42 @@ const AddExpenseForm = ({ onSuccess, defaultType = 'project' }: AddExpenseFormPr
             </FormItem>
           )}
         />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="personName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Person Name</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter person name"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="billAvailable"
+            render={({ field }) => (
+              <FormItem className="flex items-center space-x-2 space-y-0 pt-6">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <FormLabel>Bill Available</FormLabel>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormField
