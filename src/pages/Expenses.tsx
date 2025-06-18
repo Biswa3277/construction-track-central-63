@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,6 +9,7 @@ import { toast } from "sonner";
 import AddExpenseForm from "@/features/expenses/components/AddExpenseForm";
 import ExpensesList from "@/features/expenses/components/ExpensesList";
 import MonthlyStatements from "@/features/expenses/components/MonthlyStatements";
+import AccountingStatement from "@/features/expenses/components/AccountingStatement";
 import ExcelImportExport from "@/features/expenses/components/ExcelImportExport";
 import { ExpenseItem } from "@/features/expenses/types/expenseTypes";
 
@@ -94,78 +96,46 @@ const Expenses = () => {
         </div>
       </div>
 
-      {/* Project Expenses Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Project Expenses</CardTitle>
-          <CardDescription>
-            Track expenses related to project materials, transportation, team movements, and project-related travel
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-green-50 p-4 rounded-lg">
-              <h3 className="text-sm font-medium text-green-800">Total Received</h3>
-              <p className="text-2xl font-bold text-green-600">₹{projectSummary.totalReceived.toLocaleString()}</p>
-            </div>
-            <div className="bg-red-50 p-4 rounded-lg">
-              <h3 className="text-sm font-medium text-red-800">Total Spent</h3>
-              <p className="text-2xl font-bold text-red-600">₹{projectSummary.totalSpent.toLocaleString()}</p>
-            </div>
-            <div className={`p-4 rounded-lg ${projectSummary.balance >= 0 ? 'bg-blue-50' : 'bg-orange-50'}`}>
-              <h3 className={`text-sm font-medium ${projectSummary.balance >= 0 ? 'text-blue-800' : 'text-orange-800'}`}>Balance</h3>
-              <p className={`text-2xl font-bold ${projectSummary.balance >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
-                ₹{projectSummary.balance.toLocaleString()}
-              </p>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-sm font-medium text-gray-800">Total Entries</h3>
-              <p className="text-2xl font-bold text-gray-600">{projectSummary.totalEntries}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Other Expenses Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Other Expenses</CardTitle>
-          <CardDescription>
-            Track business-related expenses, travel, accommodation, food, and other non-project expenses
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-green-50 p-4 rounded-lg">
-              <h3 className="text-sm font-medium text-green-800">Total Received</h3>
-              <p className="text-2xl font-bold text-green-600">₹{otherSummary.totalReceived.toLocaleString()}</p>
-            </div>
-            <div className="bg-red-50 p-4 rounded-lg">
-              <h3 className="text-sm font-medium text-red-800">Total Spent</h3>
-              <p className="text-2xl font-bold text-red-600">₹{otherSummary.totalSpent.toLocaleString()}</p>
-            </div>
-            <div className={`p-4 rounded-lg ${otherSummary.balance >= 0 ? 'bg-blue-50' : 'bg-orange-50'}`}>
-              <h3 className={`text-sm font-medium ${otherSummary.balance >= 0 ? 'text-blue-800' : 'text-orange-800'}`}>Balance</h3>
-              <p className={`text-2xl font-bold ${otherSummary.balance >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
-                ₹{otherSummary.balance.toLocaleString()}
-              </p>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-sm font-medium text-gray-800">Total Entries</h3>
-              <p className="text-2xl font-bold text-gray-600">{otherSummary.totalEntries}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="project">Project Expenses</TabsTrigger>
           <TabsTrigger value="other">Other Expenses</TabsTrigger>
           <TabsTrigger value="statements">Monthly Statements</TabsTrigger>
+          <TabsTrigger value="accounting">Accounting Statement</TabsTrigger>
         </TabsList>
 
         <TabsContent value="project" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Project Expenses</CardTitle>
+              <CardDescription>
+                Track expenses related to project materials, transportation, team movements, and project-related travel
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h3 className="text-sm font-medium text-green-800">Total Received</h3>
+                  <p className="text-2xl font-bold text-green-600">₹{projectSummary.totalReceived.toLocaleString()}</p>
+                </div>
+                <div className="bg-red-50 p-4 rounded-lg">
+                  <h3 className="text-sm font-medium text-red-800">Total Spent</h3>
+                  <p className="text-2xl font-bold text-red-600">₹{projectSummary.totalSpent.toLocaleString()}</p>
+                </div>
+                <div className={`p-4 rounded-lg ${projectSummary.balance >= 0 ? 'bg-blue-50' : 'bg-orange-50'}`}>
+                  <h3 className={`text-sm font-medium ${projectSummary.balance >= 0 ? 'text-blue-800' : 'text-orange-800'}`}>Balance</h3>
+                  <p className={`text-2xl font-bold ${projectSummary.balance >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
+                    ₹{projectSummary.balance.toLocaleString()}
+                  </p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-sm font-medium text-gray-800">Total Entries</h3>
+                  <p className="text-2xl font-bold text-gray-600">{projectSummary.totalEntries}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
           <Card>
             <CardHeader>
               <CardTitle>Project Expenses Details</CardTitle>
@@ -185,6 +155,37 @@ const Expenses = () => {
         <TabsContent value="other" className="space-y-6">
           <Card>
             <CardHeader>
+              <CardTitle>Other Expenses</CardTitle>
+              <CardDescription>
+                Track business-related expenses, travel, accommodation, food, and other non-project expenses
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h3 className="text-sm font-medium text-green-800">Total Received</h3>
+                  <p className="text-2xl font-bold text-green-600">₹{otherSummary.totalReceived.toLocaleString()}</p>
+                </div>
+                <div className="bg-red-50 p-4 rounded-lg">
+                  <h3 className="text-sm font-medium text-red-800">Total Spent</h3>
+                  <p className="text-2xl font-bold text-red-600">₹{otherSummary.totalSpent.toLocaleString()}</p>
+                </div>
+                <div className={`p-4 rounded-lg ${otherSummary.balance >= 0 ? 'bg-blue-50' : 'bg-orange-50'}`}>
+                  <h3 className={`text-sm font-medium ${otherSummary.balance >= 0 ? 'text-blue-800' : 'text-orange-800'}`}>Balance</h3>
+                  <p className={`text-2xl font-bold ${otherSummary.balance >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
+                    ₹{otherSummary.balance.toLocaleString()}
+                  </p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-sm font-medium text-gray-800">Total Entries</h3>
+                  <p className="text-2xl font-bold text-gray-600">{otherSummary.totalEntries}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
               <CardTitle>Other Expenses Details</CardTitle>
               <CardDescription>
                 Detailed view of other expenses with running balance
@@ -201,6 +202,10 @@ const Expenses = () => {
 
         <TabsContent value="statements" className="space-y-6">
           <MonthlyStatements refreshTrigger={refreshTrigger} />
+        </TabsContent>
+
+        <TabsContent value="accounting" className="space-y-6">
+          <AccountingStatement refreshTrigger={refreshTrigger} />
         </TabsContent>
       </Tabs>
 
