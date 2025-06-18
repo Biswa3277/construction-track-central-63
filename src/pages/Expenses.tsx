@@ -9,12 +9,22 @@ import AddExpenseForm from "@/features/expenses/components/AddExpenseForm";
 import ExpensesList from "@/features/expenses/components/ExpensesList";
 import MonthlyStatements from "@/features/expenses/components/MonthlyStatements";
 import ExcelImportExport from "@/features/expenses/components/ExcelImportExport";
-import AccountingStatement from "@/features/expenses/components/AccountingStatement";
+import { ExpenseItem } from "@/features/expenses/types/expenseTypes";
 
 const Expenses = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("project");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
+
+  useEffect(() => {
+    loadExpenses();
+  }, [refreshTrigger]);
+
+  const loadExpenses = () => {
+    const storedExpenses = JSON.parse(localStorage.getItem('expenses') || '[]');
+    setExpenses(storedExpenses);
+  };
 
   const handleAddExpenseSuccess = () => {
     setIsAddDialogOpen(false);
@@ -25,6 +35,51 @@ const Expenses = () => {
   const refreshData = () => {
     setRefreshTrigger(prev => prev + 1);
   };
+
+  const getProjectExpenseSummary = () => {
+    const projectExpenses = expenses.filter(expense => expense.type === 'project');
+    let totalReceived = 0;
+    let totalSpent = 0;
+
+    projectExpenses.forEach(expense => {
+      if (expense.transactionType === 'received' || expense.transactionType === 'total_received') {
+        totalReceived += expense.amount;
+      } else if (expense.transactionType === 'spent') {
+        totalSpent += expense.amount;
+      }
+    });
+
+    return {
+      totalReceived,
+      totalSpent,
+      balance: totalReceived - totalSpent,
+      totalEntries: projectExpenses.length
+    };
+  };
+
+  const getOtherExpenseSummary = () => {
+    const otherExpenses = expenses.filter(expense => expense.type === 'other');
+    let totalReceived = 0;
+    let totalSpent = 0;
+
+    otherExpenses.forEach(expense => {
+      if (expense.transactionType === 'received' || expense.transactionType === 'total_received') {
+        totalReceived += expense.amount;
+      } else if (expense.transactionType === 'spent') {
+        totalSpent += expense.amount;
+      }
+    });
+
+    return {
+      totalReceived,
+      totalSpent,
+      balance: totalReceived - totalSpent,
+      totalEntries: otherExpenses.length
+    };
+  };
+
+  const projectSummary = getProjectExpenseSummary();
+  const otherSummary = getOtherExpenseSummary();
 
   return (
     <div className="space-y-6">
@@ -39,24 +94,83 @@ const Expenses = () => {
         </div>
       </div>
 
+      {/* Project Expenses Overview */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Project Expenses</CardTitle>
+          <CardDescription>
+            Track expenses related to project materials, transportation, team movements, and project-related travel
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h3 className="text-sm font-medium text-green-800">Total Received</h3>
+              <p className="text-2xl font-bold text-green-600">₹{projectSummary.totalReceived.toLocaleString()}</p>
+            </div>
+            <div className="bg-red-50 p-4 rounded-lg">
+              <h3 className="text-sm font-medium text-red-800">Total Spent</h3>
+              <p className="text-2xl font-bold text-red-600">₹{projectSummary.totalSpent.toLocaleString()}</p>
+            </div>
+            <div className={`p-4 rounded-lg ${projectSummary.balance >= 0 ? 'bg-blue-50' : 'bg-orange-50'}`}>
+              <h3 className={`text-sm font-medium ${projectSummary.balance >= 0 ? 'text-blue-800' : 'text-orange-800'}`}>Balance</h3>
+              <p className={`text-2xl font-bold ${projectSummary.balance >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
+                ₹{projectSummary.balance.toLocaleString()}
+              </p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="text-sm font-medium text-gray-800">Total Entries</h3>
+              <p className="text-2xl font-bold text-gray-600">{projectSummary.totalEntries}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Other Expenses Overview */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Other Expenses</CardTitle>
+          <CardDescription>
+            Track business-related expenses, travel, accommodation, food, and other non-project expenses
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h3 className="text-sm font-medium text-green-800">Total Received</h3>
+              <p className="text-2xl font-bold text-green-600">₹{otherSummary.totalReceived.toLocaleString()}</p>
+            </div>
+            <div className="bg-red-50 p-4 rounded-lg">
+              <h3 className="text-sm font-medium text-red-800">Total Spent</h3>
+              <p className="text-2xl font-bold text-red-600">₹{otherSummary.totalSpent.toLocaleString()}</p>
+            </div>
+            <div className={`p-4 rounded-lg ${otherSummary.balance >= 0 ? 'bg-blue-50' : 'bg-orange-50'}`}>
+              <h3 className={`text-sm font-medium ${otherSummary.balance >= 0 ? 'text-blue-800' : 'text-orange-800'}`}>Balance</h3>
+              <p className={`text-2xl font-bold ${otherSummary.balance >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
+                ₹{otherSummary.balance.toLocaleString()}
+              </p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="text-sm font-medium text-gray-800">Total Entries</h3>
+              <p className="text-2xl font-bold text-gray-600">{otherSummary.totalEntries}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="statement">Statement View</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="project">Project Expenses</TabsTrigger>
           <TabsTrigger value="other">Other Expenses</TabsTrigger>
           <TabsTrigger value="statements">Monthly Statements</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="statement" className="space-y-6">
-          <AccountingStatement refreshTrigger={refreshTrigger} />
-        </TabsContent>
-
         <TabsContent value="project" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Project Expenses</CardTitle>
+              <CardTitle>Project Expenses Details</CardTitle>
               <CardDescription>
-                Track expenses related to project materials, transportation, team movements, and project-related travel
+                Detailed view of project expenses with running balance
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -71,9 +185,9 @@ const Expenses = () => {
         <TabsContent value="other" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Other Expenses</CardTitle>
+              <CardTitle>Other Expenses Details</CardTitle>
               <CardDescription>
-                Track business-related expenses, travel, accommodation, food, and other non-project expenses
+                Detailed view of other expenses with running balance
               </CardDescription>
             </CardHeader>
             <CardContent>
