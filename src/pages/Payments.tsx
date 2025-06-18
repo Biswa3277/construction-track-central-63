@@ -1,12 +1,12 @@
+
 import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Filter, ArrowUpDown, GripVertical } from "lucide-react";
+import { Plus, Search, Filter, ArrowUpDown, GripVertical, Upload, Download, FileSpreadsheet } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import {
   Table,
   TableBody,
@@ -17,75 +17,39 @@ import {
 } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { BillingProject } from "@/features/billing/types/billingTypes";
+import PaymentFilterBar from "@/components/payments/PaymentFilterBar";
+
+interface VendorPayment {
+  id: string;
+  slNo: number;
+  description: string;
+  projectName: string;
+  companyName: string;
+  poReference: string;
+  poDate: string;
+  acNo: string;
+  ifscCode: string;
+  branchBank: string;
+  totalAmount: number;
+  paid: number;
+  payDate?: string;
+  payableAmount: number;
+  priority: "High" | "Medium" | "Low";
+  remarks?: string;
+  status: "paid" | "partial" | "unpaid" | "hold";
+  transactionStatus?: string;
+}
 
 const Payments = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("overall");
-  const [projects, setProjects] = useState<BillingProject[]>([]);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [priorityPayments, setPriorityPayments] = useState([
-    {
-      id: "1",
-      description: "Emergency generator repair",
-      amount: 150000,
-      priority: 1,
-      status: "pending",
-      dueDate: "2024-01-15",
-      vendor: "TechCorp Solutions"
-    },
-    {
-      id: "2", 
-      description: "Monthly office rent",
-      amount: 45000,
-      priority: 2,
-      status: "paid",
-      dueDate: "2024-01-01",
-      vendor: "Property Management"
-    },
-    {
-      id: "3",
-      description: "Equipment maintenance",
-      amount: 75000,
-      priority: 3,
-      status: "pending",
-      dueDate: "2024-01-20",
-      vendor: "Maintenance Co"
-    }
-  ]);
+  const [isAddPaymentOpen, setIsAddPaymentOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [filters, setFilters] = useState({});
 
-  const [otherPayments] = useState([
-    {
-      id: "t1",
-      type: "Transportation",
-      description: "Vehicle fuel and maintenance",
-      amount: 25000,
-      status: "pending",
-      category: "Transportation",
-      dueDate: "2024-01-18"
-    },
-    {
-      id: "u1",
-      type: "Utilities",
-      description: "Electricity bill - December",
-      amount: 18000,
-      status: "paid",
-      category: "Utilities",
-      dueDate: "2024-01-05"
-    },
-    {
-      id: "s1",
-      type: "Supplies",
-      description: "Office supplies and stationery",
-      amount: 12000,
-      status: "pending",
-      category: "Office",
-      dueDate: "2024-01-22"
-    }
-  ]);
-
-  const [allPayments] = useState([
+  const [vendorPayments, setVendorPayments] = useState<VendorPayment[]>([
     {
       id: "1",
       slNo: 1,
@@ -94,54 +58,128 @@ const Payments = () => {
       companyName: "King Longkai (Account Holder Name)",
       poReference: "PO123456",
       poDate: "2023-04-15",
+      acNo: "11522669748",
+      ifscCode: "SBIN0013311",
+      branchBank: "SBI/Namsal",
       totalAmount: 300000,
       paid: 0,
       payableAmount: 300000,
       priority: "High",
-      paymentStatus: "unpaid",
+      status: "unpaid",
     },
     {
       id: "2",
       slNo: 2,
-      description: "Supply of Man Power",
-      projectName: "YACHULI",
-      companyName: "A-TEL TECH",
+      description: "M2M Sim Card",
+      projectName: "Sample Testing",
+      companyName: "A-TEL TECH COMMUNICATION SOLUTIONS",
       poReference: "PO789012",
       poDate: "2023-05-20",
-      totalAmount: 150000,
-      paid: 75000,
-      payableAmount: 75000,
+      acNo: "42977648534",
+      ifscCode: "SBIN0011564",
+      branchBank: "MAHAVIR ENCLAVE STATE BANK OF INDIA",
+      totalAmount: 3717,
+      paid: 0,
+      payableAmount: 3717,
       priority: "Medium",
-      paymentStatus: "partial",
+      status: "unpaid",
     },
     {
       id: "3",
       slNo: 3,
-      description: "Supply of Juniper make 48 port switch",
-      projectName: "Amni WTP",
+      description: "Control Valve for Sample Testing",
+      projectName: "Sample Testing",
       companyName: "BMP SYSTEMS",
       poReference: "PO345678",
       poDate: "2023-06-25",
-      totalAmount: 80000,
-      paid: 80000,
+      acNo: "50200006302332",
+      ifscCode: "HDFC0001923",
+      branchBank: "KASBA HDFC BANK LTD",
+      totalAmount: 81510,
+      paid: 81510,
       payableAmount: 0,
       priority: "High",
-      paymentStatus: "paid",
+      status: "paid",
+      payDate: "2023-07-01",
+      remarks: "Amount Updated"
+    },
+    {
+      id: "4",
+      slNo: 4,
+      description: "Panel Internal Instruments",
+      projectName: "YACHULI",
+      companyName: "P.R.S. ENTERPRISE",
+      poReference: "PO456789",
+      poDate: "2023-07-10",
+      acNo: "101500019900115",
+      ifscCode: "ESNAP001240",
+      branchBank: "KOLKATA G.C. AVENUE",
+      totalAmount: 76891,
+      paid: 0,
+      payableAmount: 76891,
+      priority: "High",
+      status: "unpaid",
+    },
+    {
+      id: "5",
+      slNo: 5,
+      description: "Gateway module",
+      projectName: "Amni WTP",
+      companyName: "Augmate Technologies Pvt Ltd",
+      poReference: "PO567890",
+      poDate: "2023-08-15",
+      acNo: "71695500000318",
+      ifscCode: "BARB0DBMAKA",
+      branchBank: "Makaprura",
+      totalAmount: 342234,
+      paid: 101545,
+      payableAmount: 240689,
+      priority: "Medium",
+      status: "partial",
+      payDate: "2023-09-01",
+      remarks: "Amount Updated"
+    }
+  ]);
+
+  const [priorityPayments, setPriorityPayments] = useState<VendorPayment[]>([]);
+  const [otherPayments] = useState([
+    {
+      id: "t1",
+      type: "Transportation",
+      description: "Vehicle fuel and maintenance",
+      vendor: "Local Transport Co",
+      amount: 25000,
+      status: "pending",
+      dueDate: "2024-01-18"
+    },
+    {
+      id: "t2",
+      type: "Office Rent",
+      description: "Monthly office rent - December",
+      vendor: "Property Management",
+      amount: 45000,
+      status: "paid",
+      dueDate: "2024-01-05"
+    },
+    {
+      id: "t3",
+      type: "Utilities",
+      description: "Electricity bill - December",
+      vendor: "State Electricity Board",
+      amount: 18000,
+      status: "pending",
+      dueDate: "2024-01-22"
     }
   ]);
 
   useEffect(() => {
-    loadProjects();
     const tab = searchParams.get('tab');
     if (tab) {
       setActiveTab(tab);
     }
-  }, [searchParams]);
-
-  const loadProjects = () => {
-    const storedProjects = JSON.parse(localStorage.getItem('billing_projects') || '[]');
-    setProjects(storedProjects);
-  };
+    // Initialize priority payments from vendor payments
+    setPriorityPayments(vendorPayments.filter(p => p.priority === "High").slice(0, 5));
+  }, [searchParams, vendorPayments]);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -157,37 +195,24 @@ const Payments = () => {
         return <Badge className="bg-yellow-100 text-yellow-800">Partial</Badge>;
       case "pending":
       case "unpaid":
-        return <Badge className="bg-red-100 text-red-800">Pending</Badge>;
+        return <Badge className="bg-red-100 text-red-800">Unpaid</Badge>;
+      case "hold":
+        return <Badge className="bg-gray-100 text-gray-800">On Hold</Badge>;
       default:
         return <Badge variant="outline">Unknown</Badge>;
     }
   };
 
-  const getPriorityBadge = (priority: string | number) => {
-    const priorityLevel = typeof priority === 'string' ? priority.toLowerCase() : priority;
-    
-    if (typeof priorityLevel === 'number') {
-      switch (priorityLevel) {
-        case 1:
-          return <Badge className="bg-red-100 text-red-800">High</Badge>;
-        case 2:
-          return <Badge className="bg-yellow-100 text-yellow-800">Medium</Badge>;
-        case 3:
-          return <Badge className="bg-green-100 text-green-800">Low</Badge>;
-        default:
-          return <Badge variant="outline">Normal</Badge>;
-      }
-    } else {
-      switch (priorityLevel) {
-        case "high":
-          return <Badge className="bg-red-100 text-red-800">High</Badge>;
-        case "medium":
-          return <Badge className="bg-yellow-100 text-yellow-800">Medium</Badge>;
-        case "low":
-          return <Badge className="bg-green-100 text-green-800">Low</Badge>;
-        default:
-          return <Badge variant="outline">Normal</Badge>;
-      }
+  const getPriorityBadge = (priority: string) => {
+    switch (priority) {
+      case "High":
+        return <Badge className="bg-red-100 text-red-800">High</Badge>;
+      case "Medium":
+        return <Badge className="bg-yellow-100 text-yellow-800">Medium</Badge>;
+      case "Low":
+        return <Badge className="bg-green-100 text-green-800">Low</Badge>;
+      default:
+        return <Badge variant="outline">Normal</Badge>;
     }
   };
 
@@ -204,13 +229,7 @@ const Payments = () => {
       const [draggedItem] = newPayments.splice(dragIndex, 1);
       newPayments.splice(dropIndex, 0, draggedItem);
       
-      // Update priorities based on new order
-      const updatedPayments = newPayments.map((payment, index) => ({
-        ...payment,
-        priority: index + 1
-      }));
-      
-      setPriorityPayments(updatedPayments);
+      setPriorityPayments(newPayments);
       toast.success("Payment priority updated successfully!");
     }
   };
@@ -219,24 +238,44 @@ const Payments = () => {
     e.preventDefault();
   };
 
-  const getProjectPayments = (projectId: string) => {
-    return allPayments.filter(payment => 
-      projects.find(p => p.id === projectId && p.name === payment.projectName)
-    );
+  const getProjectPayments = (projectName: string) => {
+    return vendorPayments.filter(payment => payment.projectName === projectName);
   };
 
-  const calculateProgress = (project: BillingProject) => {
-    if (project.totalCost === 0) return 0;
-    return Math.round(((project.totalCost - project.totalPending) / project.totalCost) * 100);
+  const getUniqueProjects = () => {
+    const projects = [...new Set(vendorPayments.map(p => p.projectName))];
+    return projects.map(name => {
+      const projectPayments = getProjectPayments(name);
+      const totalAmount = projectPayments.reduce((sum, p) => sum + p.totalAmount, 0);
+      const totalPaid = projectPayments.reduce((sum, p) => sum + p.paid, 0);
+      const totalPending = projectPayments.reduce((sum, p) => sum + p.payableAmount, 0);
+      
+      return {
+        name,
+        totalPayments: projectPayments.length,
+        totalAmount,
+        totalPaid,
+        totalPending,
+        completionPercentage: totalAmount > 0 ? Math.round((totalPaid / totalAmount) * 100) : 0
+      };
+    });
   };
 
-  const filteredProjects = projects.filter(project => 
-    project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    project.projectOwner.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPayments = vendorPayments.filter(payment => 
+    payment.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    payment.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    payment.companyName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const downloadTemplate = () => {
+    toast.success("Excel template will be downloaded");
+  };
+
+  const exportData = () => {
+    toast.success("Payment data exported to Excel");
+  };
+
   if (selectedProject) {
-    const project = projects.find(p => p.id === selectedProject);
     const projectPayments = getProjectPayments(selectedProject);
     
     return (
@@ -246,66 +285,83 @@ const Payments = () => {
             <Button variant="outline" onClick={() => setSelectedProject(null)}>
               ← Back to Projects
             </Button>
-            <h1 className="text-3xl font-bold mt-2">Payments - {project?.name}</h1>
-            <p className="text-muted-foreground">All payments related to this project</p>
+            <h1 className="text-3xl font-bold mt-2">Payments - {selectedProject}</h1>
+            <p className="text-muted-foreground">All vendor payments for this project</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={exportData}>
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+            <Button onClick={() => setIsAddPaymentOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Payment
+            </Button>
           </div>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Project Payment Details</CardTitle>
+            <CardTitle>Project Payment Summary</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">₹{project?.totalCost.toLocaleString()}</div>
-                <div className="text-sm text-muted-foreground">Total Budget</div>
+                <div className="text-2xl font-bold text-blue-600">
+                  ₹{projectPayments.reduce((sum, p) => sum + p.totalAmount, 0).toLocaleString()}
+                </div>
+                <div className="text-sm text-muted-foreground">Total Amount</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">₹{project?.totalReceived.toLocaleString()}</div>
-                <div className="text-sm text-muted-foreground">Received</div>
+                <div className="text-2xl font-bold text-green-600">
+                  ₹{projectPayments.reduce((sum, p) => sum + p.paid, 0).toLocaleString()}
+                </div>
+                <div className="text-sm text-muted-foreground">Paid</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">₹{project?.totalPending.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-red-600">
+                  ₹{projectPayments.reduce((sum, p) => sum + p.payableAmount, 0).toLocaleString()}
+                </div>
                 <div className="text-sm text-muted-foreground">Pending</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold">{calculateProgress(project!)}%</div>
-                <div className="text-sm text-muted-foreground">Complete</div>
+                <div className="text-2xl font-bold">{projectPayments.length}</div>
+                <div className="text-sm text-muted-foreground">Total Payments</div>
               </div>
             </div>
             
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>SL No.</TableHead>
                   <TableHead>Description</TableHead>
+                  <TableHead>Vendor</TableHead>
+                  <TableHead>PO Reference</TableHead>
                   <TableHead>Total Amount</TableHead>
                   <TableHead>Paid</TableHead>
                   <TableHead>Pending</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Priority</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {projectPayments.map((payment) => (
                   <TableRow key={payment.id}>
+                    <TableCell>{payment.slNo}</TableCell>
                     <TableCell>{payment.description}</TableCell>
+                    <TableCell>{payment.companyName}</TableCell>
+                    <TableCell>{payment.poReference}</TableCell>
                     <TableCell>₹{payment.totalAmount.toLocaleString()}</TableCell>
                     <TableCell className="text-green-600">₹{payment.paid.toLocaleString()}</TableCell>
                     <TableCell className="text-red-600">₹{payment.payableAmount.toLocaleString()}</TableCell>
-                    <TableCell>{getStatusBadge(payment.paymentStatus)}</TableCell>
+                    <TableCell>{getStatusBadge(payment.status)}</TableCell>
+                    <TableCell>{getPriorityBadge(payment.priority)}</TableCell>
                     <TableCell>
                       <Button variant="ghost" size="sm">View Details</Button>
                     </TableCell>
                   </TableRow>
                 ))}
-                {projectPayments.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                      No payments found for this project.
-                    </TableCell>
-                  </TableRow>
-                )}
               </TableBody>
             </Table>
           </CardContent>
@@ -318,15 +374,29 @@ const Payments = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Payments Management</h1>
+          <h1 className="text-3xl font-bold">Vendor Payments Management</h1>
           <p className="text-muted-foreground">
-            Comprehensive payment tracking and management system
+            Track and manage all vendor payments for projects and operations
           </p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Payment
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={downloadTemplate}>
+            <FileSpreadsheet className="mr-2 h-4 w-4" />
+            Template
+          </Button>
+          <Button variant="outline" onClick={() => setIsImportDialogOpen(true)}>
+            <Upload className="mr-2 h-4 w-4" />
+            Import
+          </Button>
+          <Button variant="outline" onClick={exportData}>
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+          <Button onClick={() => setIsAddPaymentOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Payment
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
@@ -341,7 +411,7 @@ const Payments = () => {
           <Card>
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle>All Payments Overview</CardTitle>
+                <CardTitle>All Vendor Payments</CardTitle>
                 <div className="relative">
                   <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -354,38 +424,46 @@ const Payments = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>SL No.</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Project</TableHead>
-                    <TableHead>Vendor</TableHead>
-                    <TableHead>Total Amount</TableHead>
-                    <TableHead>Payable Amount</TableHead>
-                    <TableHead>Priority</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {allPayments.map((payment) => (
-                    <TableRow key={payment.id}>
-                      <TableCell>{payment.slNo}</TableCell>
-                      <TableCell>{payment.description}</TableCell>
-                      <TableCell>{payment.projectName}</TableCell>
-                      <TableCell>{payment.companyName}</TableCell>
-                      <TableCell>₹{payment.totalAmount.toLocaleString()}</TableCell>
-                      <TableCell>₹{payment.payableAmount.toLocaleString()}</TableCell>
-                      <TableCell>{getPriorityBadge(payment.priority)}</TableCell>
-                      <TableCell>{getStatusBadge(payment.paymentStatus)}</TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">View Details</Button>
-                      </TableCell>
+              <PaymentFilterBar onFilterChange={setFilters} />
+              
+              <div className="mt-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>SL No.</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead>Project</TableHead>
+                      <TableHead>Vendor</TableHead>
+                      <TableHead>PO Reference</TableHead>
+                      <TableHead>Total Amount</TableHead>
+                      <TableHead>Paid</TableHead>
+                      <TableHead>Pending</TableHead>
+                      <TableHead>Priority</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredPayments.map((payment) => (
+                      <TableRow key={payment.id}>
+                        <TableCell>{payment.slNo}</TableCell>
+                        <TableCell>{payment.description}</TableCell>
+                        <TableCell>{payment.projectName}</TableCell>
+                        <TableCell>{payment.companyName}</TableCell>
+                        <TableCell>{payment.poReference}</TableCell>
+                        <TableCell>₹{payment.totalAmount.toLocaleString()}</TableCell>
+                        <TableCell className="text-green-600">₹{payment.paid.toLocaleString()}</TableCell>
+                        <TableCell className="text-red-600">₹{payment.payableAmount.toLocaleString()}</TableCell>
+                        <TableCell>{getPriorityBadge(payment.priority)}</TableCell>
+                        <TableCell>{getStatusBadge(payment.status)}</TableCell>
+                        <TableCell>
+                          <Button variant="ghost" size="sm">View Details</Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -394,7 +472,7 @@ const Payments = () => {
           <Card>
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle>Projects Payment Status</CardTitle>
+                <CardTitle>Project-wise Payment Status</CardTitle>
                 <div className="relative">
                   <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -408,53 +486,40 @@ const Payments = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredProjects.map((project) => {
-                  const progress = calculateProgress(project);
-                  const projectPayments = getProjectPayments(project.id);
-                  
-                  return (
-                    <Card 
-                      key={project.id} 
-                      className="cursor-pointer hover:shadow-md transition-shadow"
-                      onClick={() => setSelectedProject(project.id)}
-                    >
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-lg">{project.name}</CardTitle>
-                        <div className="text-sm text-muted-foreground">
-                          {projectPayments.length} payment(s)
+                {getUniqueProjects().map((project) => (
+                  <Card 
+                    key={project.name} 
+                    className="cursor-pointer hover:shadow-md transition-shadow"
+                    onClick={() => setSelectedProject(project.name)}
+                  >
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg">{project.name}</CardTitle>
+                      <div className="text-sm text-muted-foreground">
+                        {project.totalPayments} payment(s)
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex justify-between text-sm">
+                          <span>Total Amount:</span>
+                          <span className="font-medium">₹{project.totalAmount.toLocaleString()}</span>
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-3">
-                          <div className="flex justify-between text-sm">
-                            <span>Total Budget:</span>
-                            <span className="font-medium">₹{project.totalCost.toLocaleString()}</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span>Received:</span>
-                            <span className="font-medium text-green-600">₹{project.totalReceived.toLocaleString()}</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span>Pending:</span>
-                            <span className="font-medium text-red-600">₹{project.totalPending.toLocaleString()}</span>
-                          </div>
-                          <div>
-                            <div className="flex justify-between text-sm mb-1">
-                              <span>Progress:</span>
-                              <span>{progress}%</span>
-                            </div>
-                            <Progress value={progress} className="h-2" />
-                          </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Paid:</span>
+                          <span className="font-medium text-green-600">₹{project.totalPaid.toLocaleString()}</span>
                         </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-                {filteredProjects.length === 0 && (
-                  <div className="col-span-full text-center py-8 text-muted-foreground">
-                    No projects found. Add your first project to get started.
-                  </div>
-                )}
+                        <div className="flex justify-between text-sm">
+                          <span>Pending:</span>
+                          <span className="font-medium text-red-600">₹{project.totalPending.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Completion:</span>
+                          <span className="font-medium">{project.completionPercentage}%</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -483,13 +548,14 @@ const Payments = () => {
                     className="flex items-center gap-4 p-4 border rounded-lg cursor-move hover:bg-gray-50 transition-colors"
                   >
                     <GripVertical className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1 grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
                       <div className="font-medium">{payment.description}</div>
-                      <div>₹{payment.amount.toLocaleString()}</div>
-                      <div>{payment.vendor}</div>
-                      <div>Due: {payment.dueDate}</div>
+                      <div>₹{payment.totalAmount.toLocaleString()}</div>
+                      <div>{payment.companyName}</div>
+                      <div>{payment.projectName}</div>
+                      <div>Due: {payment.poDate}</div>
                       <div className="flex gap-2">
-                        <Badge className="bg-blue-100 text-blue-800">Priority {payment.priority}</Badge>
+                        {getPriorityBadge(payment.priority)}
                         {getStatusBadge(payment.status)}
                       </div>
                     </div>
@@ -505,7 +571,7 @@ const Payments = () => {
             <CardHeader>
               <CardTitle>Other Payments</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Payments not related to specific projects
+                Non-project payments like transportation, utilities, etc.
               </p>
             </CardHeader>
             <CardContent>
@@ -514,7 +580,7 @@ const Payments = () => {
                   <TableRow>
                     <TableHead>Type</TableHead>
                     <TableHead>Description</TableHead>
-                    <TableHead>Category</TableHead>
+                    <TableHead>Vendor</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Due Date</TableHead>
                     <TableHead>Status</TableHead>
@@ -526,9 +592,7 @@ const Payments = () => {
                     <TableRow key={payment.id}>
                       <TableCell className="font-medium">{payment.type}</TableCell>
                       <TableCell>{payment.description}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{payment.category}</Badge>
-                      </TableCell>
+                      <TableCell>{payment.vendor}</TableCell>
                       <TableCell>₹{payment.amount.toLocaleString()}</TableCell>
                       <TableCell>{payment.dueDate}</TableCell>
                       <TableCell>{getStatusBadge(payment.status)}</TableCell>
@@ -543,6 +607,29 @@ const Payments = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Import Payments from Excel</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Upload an Excel file with payment data. Make sure to follow the template format.
+            </p>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={downloadTemplate} className="flex-1">
+                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                Download Template
+              </Button>
+              <Button className="flex-1">
+                <Upload className="mr-2 h-4 w-4" />
+                Choose File
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
