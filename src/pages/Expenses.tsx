@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,7 +10,6 @@ import AddExpenseForm from "@/features/expenses/components/AddExpenseForm";
 import ExpensesList from "@/features/expenses/components/ExpensesList";
 import MonthlyStatements from "@/features/expenses/components/MonthlyStatements";
 import ExcelImportExport from "@/features/expenses/components/ExcelImportExport";
-import ExpenseCalculator from "@/features/expenses/components/ExpenseCalculator";
 
 const Expenses = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -40,16 +40,11 @@ const Expenses = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="calculator">Calculator</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="project">Project Expenses</TabsTrigger>
           <TabsTrigger value="other">Other Expenses</TabsTrigger>
           <TabsTrigger value="statements">Monthly Statements</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="calculator" className="space-y-6">
-          <ExpenseCalculator refreshTrigger={refreshTrigger} />
-        </TabsContent>
 
         <TabsContent value="project" className="space-y-6">
           <Card>
