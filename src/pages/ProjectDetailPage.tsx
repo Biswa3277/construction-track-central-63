@@ -7,9 +7,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, Eye, Edit, Trash2, IndianRupee } from "lucide-react";
+import { ArrowLeft, Plus, Eye, Edit, Trash2, IndianRupee, BarChart3, Truck } from "lucide-react";
 import { toast } from "sonner";
 import AddScopeOfWorkDialog from "@/components/projects/AddScopeOfWorkDialog";
+import TransportationStatus from "@/components/transportation/TransportationStatus";
 import { BillingProject } from "@/features/billing/types/billingTypes";
 
 const ProjectDetailPage = () => {
@@ -59,6 +60,26 @@ const ProjectDetailPage = () => {
     return { totalVendors, paidVendors, pendingAmount };
   };
 
+  const getProjectProgressStats = () => {
+    if (!project) return { activeScopes: 0, totalScopes: 0 };
+    
+    const totalScopes = project.workPlan.length;
+    const activeScopes = project.workPlan.filter(scope => 
+      scope.status === 'in-progress' || scope.status === 'pending'
+    ).length;
+    
+    return { activeScopes, totalScopes };
+  };
+
+  const getTransportationStats = () => {
+    // Mock transportation data - in a real app this would come from actual transportation data
+    const totalShipments = Math.max(1, Math.floor(Math.random() * 20) + 5);
+    const inTransit = Math.floor(totalShipments * 0.25);
+    const delivered = totalShipments - inTransit;
+    
+    return { totalShipments, inTransit, delivered };
+  };
+
   const handleScopeAdded = () => {
     setIsAddScopeOpen(false);
     loadProject();
@@ -100,6 +121,8 @@ const ProjectDetailPage = () => {
   }
 
   const vendorPaymentStatus = getVendorPaymentStatus();
+  const progressStats = getProjectProgressStats();
+  const transportationStats = getTransportationStats();
 
   return (
     <>
@@ -113,6 +136,49 @@ const ProjectDetailPage = () => {
             <h1 className="text-3xl font-bold">{project.name}</h1>
             <p className="text-muted-foreground">Project Details & Scope of Works</p>
           </div>
+        </div>
+
+        {/* Project Progress and Transportation Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Project Progress Card */}
+          <Card className="cursor-pointer hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg font-medium">Project Progress</CardTitle>
+              <BarChart3 className="h-5 w-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{calculateProgress()}%</div>
+              <p className="text-sm text-muted-foreground">
+                {progressStats.activeScopes} active of {progressStats.totalScopes} total
+              </p>
+              <div className="mt-4">
+                <Progress value={calculateProgress()} className="h-2" />
+              </div>
+              <div className="flex items-center justify-end mt-3">
+                <span className="text-sm text-muted-foreground">→</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Transportation Card */}
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/transportation')}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg font-medium">Transportation</CardTitle>
+              <Truck className="h-5 w-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{transportationStats.totalShipments}</div>
+              <p className="text-sm text-muted-foreground">
+                {transportationStats.inTransit} in transit, {transportationStats.delivered} delivered
+              </p>
+              <div className="mt-4 flex items-center justify-between">
+                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">
+                  On Track
+                </span>
+                <span className="text-sm text-muted-foreground">→</span>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Project Overview Card */}
