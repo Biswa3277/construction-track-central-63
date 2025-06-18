@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
-import { ArrowLeft, Plus, MapPin, Clock, CheckCircle } from "lucide-react";
+import { ArrowLeft, Plus, MapPin, Clock, CheckCircle, Calendar as CalendarIcon } from "lucide-react";
 import { TeamMember } from "../types/teamTypes";
 import { toast } from "sonner";
 
@@ -167,6 +166,18 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
         <div>
           <h1 className="text-2xl font-bold">{member.name} Dashboard</h1>
           <p className="text-muted-foreground">{member.role} - {member.department}</p>
+        </div>
+      </div>
+
+      {/* Section Headers */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="flex items-center gap-2 mb-2">
+          <CalendarIcon className="h-6 w-6 text-blue-600" />
+          <h2 className="text-xl font-semibold">Report Calendar</h2>
+        </div>
+        <div className="flex items-center gap-2 mb-2">
+          <CheckCircle className="h-6 w-6 text-green-600" />
+          <h2 className="text-xl font-semibold">Things To Do</h2>
         </div>
       </div>
 
