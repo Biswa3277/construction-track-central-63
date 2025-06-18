@@ -124,15 +124,26 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
   };
 
   const updateTodoProgress = (todoId: string, newProgress: number) => {
-    const updatedTodos = todos.map(todo => 
-      todo.id === todoId 
-        ? { 
-            ...todo, 
-            progress: newProgress,
-            status: newProgress === 100 ? 'completed' : newProgress > 0 ? 'in-progress' : 'pending'
-          }
-        : todo
-    );
+    const updatedTodos = todos.map(todo => {
+      if (todo.id === todoId) {
+        let newStatus: 'pending' | 'in-progress' | 'completed';
+        if (newProgress === 100) {
+          newStatus = 'completed';
+        } else if (newProgress > 0) {
+          newStatus = 'in-progress';
+        } else {
+          newStatus = 'pending';
+        }
+        
+        return { 
+          ...todo, 
+          progress: newProgress,
+          status: newStatus
+        };
+      }
+      return todo;
+    });
+    
     setTodos(updatedTodos);
     localStorage.setItem(`todos_${member.id}`, JSON.stringify(updatedTodos));
   };
