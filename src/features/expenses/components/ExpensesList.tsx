@@ -96,6 +96,17 @@ const ExpensesList = ({ type, refreshTrigger }: ExpensesListProps) => {
     toast.success("Expense deleted successfully");
   };
 
+  const updateApprovalStatus = (id: string, newStatus: 'Approved' | 'Hold' | 'waiting') => {
+    const updatedExpenses = expenses.map(expense => 
+      expense.id === id 
+        ? { ...expense, approvalStatus: newStatus, updatedAt: new Date().toISOString() }
+        : expense
+    );
+    setExpenses(updatedExpenses);
+    localStorage.setItem('expenses', JSON.stringify(updatedExpenses));
+    toast.success("Approval status updated successfully");
+  };
+
   const getUniqueCategories = () => {
     const categories = expenses
       .filter(expense => expense.type === type)
@@ -105,6 +116,15 @@ const ExpensesList = ({ type, refreshTrigger }: ExpensesListProps) => {
 
   const formatAmount = (amount: number) => {
     return amount === 0 ? '' : amount.toFixed(2);
+  };
+
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'Approved': return 'default';
+      case 'Hold': return 'destructive';
+      case 'waiting': return 'secondary';
+      default: return 'secondary';
+    }
   };
 
   return (
@@ -163,6 +183,7 @@ const ExpensesList = ({ type, refreshTrigger }: ExpensesListProps) => {
                 <TableHead className="font-bold border-r text-center min-w-[100px] h-8 py-2">Debit</TableHead>
                 <TableHead className="font-bold border-r text-center min-w-[100px] h-8 py-2">Credit</TableHead>
                 <TableHead className="font-bold border-r text-center min-w-[100px] h-8 py-2">Balance</TableHead>
+                <TableHead className="font-bold border-r text-center min-w-[120px] h-8 py-2">Approval Status</TableHead>
                 <TableHead className="font-bold text-center min-w-[80px] h-8 py-2">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -192,6 +213,33 @@ const ExpensesList = ({ type, refreshTrigger }: ExpensesListProps) => {
                     expense.balance < 0 ? 'text-red-600' : expense.balance > 0 ? 'text-green-600' : 'text-gray-600'
                   }`}>
                     {expense.balance.toFixed(2)}
+                  </TableCell>
+                  <TableCell className="border-r py-2">
+                    <Select
+                      value={expense.approvalStatus}
+                      onValueChange={(value: 'Approved' | 'Hold' | 'waiting') => 
+                        updateApprovalStatus(expense.id, value)
+                      }
+                    >
+                      <SelectTrigger className="w-full h-8">
+                        <SelectValue>
+                          <Badge variant={getStatusBadgeVariant(expense.approvalStatus)} className="text-xs">
+                            {expense.approvalStatus}
+                          </Badge>
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Approved">
+                          <Badge variant="default" className="text-xs">Approved</Badge>
+                        </SelectItem>
+                        <SelectItem value="Hold">
+                          <Badge variant="destructive" className="text-xs">Hold</Badge>
+                        </SelectItem>
+                        <SelectItem value="waiting">
+                          <Badge variant="secondary" className="text-xs">waiting</Badge>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </TableCell>
                   <TableCell className="py-2">
                     <Button

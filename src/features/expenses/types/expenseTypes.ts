@@ -12,6 +12,7 @@ export interface ExpenseItem {
   paymentMethod: string;
   personName?: string;
   billAvailable: boolean;
+  approvalStatus: 'Approved' | 'Hold' | 'waiting';
   createdAt: string;
   updatedAt: string;
 }
