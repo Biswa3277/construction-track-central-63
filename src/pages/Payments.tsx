@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -165,21 +164,30 @@ const Payments = () => {
   };
 
   const getPriorityBadge = (priority: string | number) => {
-    const priorityLevel = typeof priority === 'string' ? priority.toLowerCase() : 
-      priority === 1 ? 'high' : priority === 2 ? 'medium' : 'low';
+    const priorityLevel = typeof priority === 'string' ? priority.toLowerCase() : priority;
     
-    switch (priorityLevel) {
-      case "high":
-      case 1:
-        return <Badge className="bg-red-100 text-red-800">High</Badge>;
-      case "medium":
-      case 2:
-        return <Badge className="bg-yellow-100 text-yellow-800">Medium</Badge>;
-      case "low":
-      case 3:
-        return <Badge className="bg-green-100 text-green-800">Low</Badge>;
-      default:
-        return <Badge variant="outline">Normal</Badge>;
+    if (typeof priorityLevel === 'number') {
+      switch (priorityLevel) {
+        case 1:
+          return <Badge className="bg-red-100 text-red-800">High</Badge>;
+        case 2:
+          return <Badge className="bg-yellow-100 text-yellow-800">Medium</Badge>;
+        case 3:
+          return <Badge className="bg-green-100 text-green-800">Low</Badge>;
+        default:
+          return <Badge variant="outline">Normal</Badge>;
+      }
+    } else {
+      switch (priorityLevel) {
+        case "high":
+          return <Badge className="bg-red-100 text-red-800">High</Badge>;
+        case "medium":
+          return <Badge className="bg-yellow-100 text-yellow-800">Medium</Badge>;
+        case "low":
+          return <Badge className="bg-green-100 text-green-800">Low</Badge>;
+        default:
+          return <Badge variant="outline">Normal</Badge>;
+      }
     }
   };
 
