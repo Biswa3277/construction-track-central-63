@@ -7,7 +7,7 @@ export interface ExpenseItem {
   projectName?: string;
   description: string;
   amount: number;
-  transactionType: 'received' | 'spent' | 'total_received';
+  transactionType: 'received' | 'spent';
   date: string;
   paymentMethod: string;
   personName?: string;

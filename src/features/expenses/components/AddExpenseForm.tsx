@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,7 +24,7 @@ const expenseSchema = z.object({
   projectName: z.string().optional(),
   description: z.string().min(1, "Description is required"),
   amount: z.number().min(0.01, "Amount must be greater than 0"),
-  transactionType: z.enum(["received", "spent", "total_received"]),
+  transactionType: z.enum(["received", "spent"]),
   date: z.date(),
   paymentMethod: z.string().min(1, "Payment method is required"),
   personName: z.string().optional(),
@@ -279,7 +278,6 @@ const AddExpenseForm = ({ onSuccess, defaultType = 'project' }: AddExpenseFormPr
                   <SelectContent>
                     <SelectItem value="received">Amount Received</SelectItem>
                     <SelectItem value="spent">Amount Spent</SelectItem>
-                    <SelectItem value="total_received">Total Received</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
