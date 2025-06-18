@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { X, Calendar } from "lucide-react";
 
 interface FilterBarProps {
   onFilterChange: (filters: any) => void;
@@ -37,7 +37,7 @@ const PaymentFilterBar = ({ onFilterChange }: FilterBarProps) => {
   };
 
   const clearFilter = (key: string) => {
-    const newFilters = { ...filters, [key]: "" };
+    const newFilters = { ...filters, [key]: key === "dateFrom" || key === "dateTo" ? null : "" };
     setFilters(newFilters);
     setActiveFilters(activeFilters.filter(k => k !== key));
     onFilterChange(newFilters);
@@ -54,6 +54,30 @@ const PaymentFilterBar = ({ onFilterChange }: FilterBarProps) => {
     setFilters(resetFilters);
     setActiveFilters([]);
     onFilterChange(resetFilters);
+  };
+
+  const setDatePreset = (days: number) => {
+    const today = new Date();
+    const fromDate = new Date(today);
+    fromDate.setDate(today.getDate() - days);
+    
+    const newFilters = { 
+      ...filters, 
+      dateFrom: fromDate, 
+      dateTo: today 
+    };
+    setFilters(newFilters);
+    
+    const newActiveFilters = [...activeFilters];
+    if (!newActiveFilters.includes("dateFrom")) {
+      newActiveFilters.push("dateFrom");
+    }
+    if (!newActiveFilters.includes("dateTo")) {
+      newActiveFilters.push("dateTo");
+    }
+    setActiveFilters(newActiveFilters);
+    
+    onFilterChange(newFilters);
   };
 
   const getFilterLabel = (key: string) => {
@@ -89,8 +113,9 @@ const PaymentFilterBar = ({ onFilterChange }: FilterBarProps) => {
             <SelectContent>
               <SelectItem value="Sample Testing">Sample Testing</SelectItem>
               <SelectItem value="YACHULI">YACHULI</SelectItem>
-              <SelectItem value="Amni WTP">Amni WTP</SelectItem>
+              <SelectItem value="Amrit WTP">Amrit WTP</SelectItem>
               <SelectItem value="Machuika">Machuika</SelectItem>
+              <SelectItem value="Piyong IoT">Piyong IoT</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -109,6 +134,7 @@ const PaymentFilterBar = ({ onFilterChange }: FilterBarProps) => {
               <SelectItem value="A-TEL TECH">A-TEL TECH</SelectItem>
               <SelectItem value="BMP SYSTEMS">BMP SYSTEMS</SelectItem>
               <SelectItem value="P.R.S ENTERPRISE">P.R.S ENTERPRISE</SelectItem>
+              <SelectItem value="Augmate Technologies">Augmate Technologies</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -150,8 +176,54 @@ const PaymentFilterBar = ({ onFilterChange }: FilterBarProps) => {
         </div>
       </div>
 
+      {/* Date Preset Buttons */}
+      <div className="flex flex-wrap gap-2 pt-2">
+        <div className="flex items-center gap-2 mr-4">
+          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <Label className="text-sm font-medium">Quick Date Filters:</Label>
+        </div>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => setDatePreset(7)}
+          className="h-8"
+        >
+          Last 7 Days
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => setDatePreset(15)}
+          className="h-8"
+        >
+          Last 15 Days
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => setDatePreset(30)}
+          className="h-8"
+        >
+          Last 30 Days
+        </Button>
+        {(filters.dateFrom || filters.dateTo) && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => {
+              handleFilterChange("dateFrom", null);
+              handleFilterChange("dateTo", null);
+            }}
+            className="h-8"
+          >
+            Clear Dates
+          </Button>
+        )}
+      </div>
+
       {activeFilters.length > 0 && (
-        <div className="flex flex-wrap gap-2 pt-2">
+        <div className="flex flex-wrap gap-2 pt-2 border-t">
+          <Label className="text-sm font-medium self-center">Active Filters:</Label>
           {activeFilters.map(key => (
             <Badge key={key} variant="secondary" className="flex items-center gap-1">
               {getFilterLabel(key)}: {getFilterValue(key)}
