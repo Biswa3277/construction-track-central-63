@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Trash2 } from "lucide-react";
+import { Search, Trash2, Check, X } from "lucide-react";
 import { ExpenseItem } from "../types/expenseTypes";
 import { toast } from "sonner";
 
@@ -48,7 +47,8 @@ const ExpensesList = ({ type, refreshTrigger }: ExpensesListProps) => {
       filtered = filtered.filter(expense =>
         expense.description.toLowerCase().includes(query) ||
         expense.category.toLowerCase().includes(query) ||
-        (expense.projectName && expense.projectName.toLowerCase().includes(query))
+        (expense.projectName && expense.projectName.toLowerCase().includes(query)) ||
+        (expense.personName && expense.personName.toLowerCase().includes(query))
       );
     }
 
@@ -158,6 +158,8 @@ const ExpensesList = ({ type, refreshTrigger }: ExpensesListProps) => {
                 {type === 'project' && <TableHead className="font-bold border-r min-w-[120px]">Project/Others</TableHead>}
                 <TableHead className="font-bold border-r min-w-[100px]">Type</TableHead>
                 <TableHead className="font-bold border-r min-w-[120px]">Payment Method</TableHead>
+                <TableHead className="font-bold border-r min-w-[120px]">Person Name</TableHead>
+                <TableHead className="font-bold border-r min-w-[100px]">Bill Available</TableHead>
                 <TableHead className="font-bold border-r text-center min-w-[100px]">Debit</TableHead>
                 <TableHead className="font-bold border-r text-center min-w-[100px]">Credit</TableHead>
                 <TableHead className="font-bold border-r text-center min-w-[100px]">Balance</TableHead>
@@ -178,6 +180,14 @@ const ExpensesList = ({ type, refreshTrigger }: ExpensesListProps) => {
                     </Badge>
                   </TableCell>
                   <TableCell className="border-r">{expense.paymentMethod}</TableCell>
+                  <TableCell className="border-r">{expense.personName || '-'}</TableCell>
+                  <TableCell className="border-r text-center">
+                    {expense.billAvailable ? (
+                      <Check className="h-4 w-4 text-green-600 mx-auto" />
+                    ) : (
+                      <X className="h-4 w-4 text-red-600 mx-auto" />
+                    )}
+                  </TableCell>
                   <TableCell className="border-r text-right text-red-600">
                     {formatAmount(expense.debit)}
                   </TableCell>

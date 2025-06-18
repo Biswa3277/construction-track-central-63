@@ -1,8 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Check, X } from "lucide-react";
 import { ExpenseItem } from "../types/expenseTypes";
 
 interface AccountingStatementProps {
@@ -18,6 +20,8 @@ interface StatementEntry {
   type: 'project' | 'other' | 'opening' | 'totals';
   amount: number;
   paymentMethod: string;
+  personName: string;
+  billAvailable: boolean;
   transactionType: 'received' | 'spent' | 'total_received' | 'opening' | 'totals';
   debit: number;
   credit: number;
@@ -67,6 +71,8 @@ const AccountingStatement = ({ refreshTrigger }: AccountingStatementProps) => {
       type: 'opening',
       amount: 0,
       paymentMethod: '',
+      personName: '',
+      billAvailable: false,
       transactionType: 'opening',
       debit: 0,
       credit: 0,
@@ -94,6 +100,8 @@ const AccountingStatement = ({ refreshTrigger }: AccountingStatementProps) => {
         type: expense.type,
         amount: expense.amount,
         paymentMethod: expense.paymentMethod,
+        personName: expense.personName || '',
+        billAvailable: expense.billAvailable || false,
         transactionType: expense.transactionType,
         debit,
         credit,
@@ -115,6 +123,8 @@ const AccountingStatement = ({ refreshTrigger }: AccountingStatementProps) => {
       type: 'totals',
       amount: 0,
       paymentMethod: '',
+      personName: '',
+      billAvailable: false,
       transactionType: 'totals',
       debit: totalDebit,
       credit: totalCredit,
@@ -165,6 +175,8 @@ const AccountingStatement = ({ refreshTrigger }: AccountingStatementProps) => {
                   <TableHead className="font-bold border-r min-w-[120px]">Project/Others</TableHead>
                   <TableHead className="font-bold border-r min-w-[100px]">Type</TableHead>
                   <TableHead className="font-bold border-r min-w-[120px]">Payment Method</TableHead>
+                  <TableHead className="font-bold border-r min-w-[120px]">Person Name</TableHead>
+                  <TableHead className="font-bold border-r min-w-[100px]">Bill Available</TableHead>
                   <TableHead className="font-bold border-r text-center min-w-[100px]">Debit</TableHead>
                   <TableHead className="font-bold border-r text-center min-w-[100px]">Credit</TableHead>
                   <TableHead className="font-bold text-center min-w-[100px]">Balance</TableHead>
@@ -196,6 +208,18 @@ const AccountingStatement = ({ refreshTrigger }: AccountingStatementProps) => {
                     </TableCell>
                     <TableCell className="border-r">
                       {entry.paymentMethod}
+                    </TableCell>
+                    <TableCell className="border-r">
+                      {entry.personName || '-'}
+                    </TableCell>
+                    <TableCell className="border-r text-center">
+                      {entry.id === 'opening' || entry.id === 'totals' ? '-' : (
+                        entry.billAvailable ? (
+                          <Check className="h-4 w-4 text-green-600 mx-auto" />
+                        ) : (
+                          <X className="h-4 w-4 text-red-600 mx-auto" />
+                        )
+                      )}
                     </TableCell>
                     <TableCell className="border-r text-right text-red-600">
                       {formatAmount(entry.debit)}

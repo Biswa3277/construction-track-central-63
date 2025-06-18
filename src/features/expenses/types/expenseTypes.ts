@@ -10,6 +10,8 @@ export interface ExpenseItem {
   transactionType: 'received' | 'spent' | 'total_received';
   date: string;
   paymentMethod: string;
+  personName?: string;
+  billAvailable: boolean;
   createdAt: string;
   updatedAt: string;
 }
