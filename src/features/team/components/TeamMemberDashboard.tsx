@@ -171,7 +171,7 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Calendar Section */}
+        {/* Work Calendar Section */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -247,7 +247,7 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
           </CardContent>
         </Card>
 
-        {/* Todo List Section */}
+        {/* Things To Do Section */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
