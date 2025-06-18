@@ -8,6 +8,7 @@ import MainLayout from "@/features/layout/components/MainLayout";
 import LoginPage from "@/features/auth/components/LoginPage";
 import Dashboard from "@/pages/Dashboard";
 import Projects from "@/pages/Projects";
+import ProjectDashboard from "@/pages/ProjectDashboard";
 import DepartmentProjects from "@/pages/DepartmentProjects";
 import Payments from "@/pages/Payments";
 import ProjectBilling from "@/pages/ProjectBilling";

@@ -94,7 +94,7 @@ const TodoDetailsDialog = ({ todo, onClose, onUpdate }: TodoDetailsDialogProps) 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="priority">Priority</Label>
-            <Select value={formData.priority} onValueChange={(value) => setFormData({...formData, priority: value})}>
+            <Select value={formData.priority} onValueChange={(value: 'low' | 'medium' | 'high') => setFormData({...formData, priority: value})}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -107,7 +107,7 @@ const TodoDetailsDialog = ({ todo, onClose, onUpdate }: TodoDetailsDialogProps) 
           </div>
           <div>
             <Label htmlFor="status">Status</Label>
-            <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value})}>
+            <Select value={formData.status} onValueChange={(value: 'pending' | 'in-progress' | 'completed') => setFormData({...formData, status: value})}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
