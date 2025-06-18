@@ -35,6 +35,7 @@ const MainNavigation = ({ user }: MainNavigationProps) => {
 
   const navItems = [
     { icon: Home, label: "Dashboard", path: "/dashboard" },
+    { icon: BarChart3, label: "Project Dashboard", path: "/project-dashboard" },
     { icon: Layers, label: "Projects & Tasks", path: "/department-projects" },
     { icon: FileText, label: "Payments", path: "/payments" },
     { icon: Calculator, label: "Project Billing", path: "/project-billing" },

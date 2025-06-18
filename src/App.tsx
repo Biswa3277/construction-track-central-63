@@ -38,6 +38,7 @@ const App = () => {
             <Route path="/" element={<MainLayout />}>
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="projects" element={<Projects />} />
+              <Route path="project-dashboard" element={<ProjectDashboard />} />
               <Route path="department-projects" element={<DepartmentProjects />} />
               <Route path="payments" element={<Payments />} />
               <Route path="payments/:id" element={<PaymentDetailView />} />
