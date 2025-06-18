@@ -134,12 +134,8 @@ const DepartmentProjects = () => {
     return { totalVendors, paidVendors, pendingAmount };
   };
 
-  const handleDepartmentAction = (deptId: string, action: string) => {
-    if (action === 'payments') {
-      navigate('/payments');
-    } else if (action === 'projects') {
-      setSelectedDepartment(deptId);
-    }
+  const handleDepartmentClick = (deptId: string) => {
+    setSelectedDepartment(deptId);
   };
 
   const handleAddProject = () => {
@@ -182,7 +178,11 @@ const DepartmentProjects = () => {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {departments.map(dept => (
-                    <Card key={dept.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                    <Card 
+                      key={dept.id} 
+                      className="cursor-pointer hover:shadow-md transition-shadow"
+                      onClick={() => handleDepartmentClick(dept.id)}
+                    >
                       <CardHeader className="pb-2">
                         <CardTitle>{dept.name}</CardTitle>
                         <CardDescription>Manager: {dept.manager}</CardDescription>
@@ -193,14 +193,6 @@ const DepartmentProjects = () => {
                           <Badge variant="outline">{dept.ongoingProjects} / {dept.totalProjects}</Badge>
                         </div>
                         <Progress value={(dept.ongoingProjects / dept.totalProjects) * 100} className="h-2" />
-                        <div className="flex justify-between mt-4">
-                          <Button size="sm" variant="outline" onClick={() => handleDepartmentAction(dept.id, 'projects')}>
-                            View Projects
-                          </Button>
-                          <Button size="sm" onClick={() => handleDepartmentAction(dept.id, 'payments')}>
-                            Payments
-                          </Button>
-                        </div>
                       </CardContent>
                     </Card>
                   ))}
