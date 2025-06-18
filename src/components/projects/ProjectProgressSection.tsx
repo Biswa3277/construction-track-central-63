@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Eye, Edit, FolderPlus } from "lucide-react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import AddProjectWithScopeForm from "./AddProjectWithScopeForm";
 import ProjectDetailsDialog from "./ProjectDetailsDialog";
@@ -106,7 +107,14 @@ const ProjectProgressSection = ({ projects, onProjectsUpdate }: ProjectProgressS
                 <TableBody>
                   {projects.map((project) => (
                     <TableRow key={project.id}>
-                      <TableCell className="font-medium">{project.name}</TableCell>
+                      <TableCell className="font-medium">
+                        <Link 
+                          to={`/project/${project.id}`}
+                          className="text-blue-600 hover:text-blue-800 hover:underline"
+                        >
+                          {project.name}
+                        </Link>
+                      </TableCell>
                       <TableCell>{project.projectOwner}</TableCell>
                       <TableCell>₹{project.totalCost.toLocaleString()}</TableCell>
                       <TableCell>
