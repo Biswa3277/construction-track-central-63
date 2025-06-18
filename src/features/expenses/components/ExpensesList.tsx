@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -13,9 +14,15 @@ interface ExpensesListProps {
   refreshTrigger: number;
 }
 
+interface ExpenseWithBalance extends ExpenseItem {
+  debit: number;
+  credit: number;
+  balance: number;
+}
+
 const ExpensesList = ({ type, refreshTrigger }: ExpensesListProps) => {
   const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
-  const [filteredExpenses, setFilteredExpenses] = useState<ExpenseItem[]>([]);
+  const [filteredExpenses, setFilteredExpenses] = useState<ExpenseWithBalance[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [transactionFilter, setTransactionFilter] = useState("all");
@@ -53,7 +60,32 @@ const ExpensesList = ({ type, refreshTrigger }: ExpensesListProps) => {
       filtered = filtered.filter(expense => expense.transactionType === transactionFilter);
     }
 
-    setFilteredExpenses(filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+    // Sort by date
+    const sortedExpenses = filtered.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    // Calculate running balance
+    let runningBalance = 0;
+    const expensesWithBalance: ExpenseWithBalance[] = sortedExpenses.map((expense) => {
+      let debit = 0;
+      let credit = 0;
+
+      if (expense.transactionType === 'spent') {
+        debit = expense.amount;
+        runningBalance -= expense.amount;
+      } else if (expense.transactionType === 'received' || expense.transactionType === 'total_received') {
+        credit = expense.amount;
+        runningBalance += expense.amount;
+      }
+
+      return {
+        ...expense,
+        debit,
+        credit,
+        balance: runningBalance
+      };
+    });
+
+    setFilteredExpenses(expensesWithBalance);
   };
 
   const deleteExpense = (id: string) => {
@@ -71,19 +103,19 @@ const ExpensesList = ({ type, refreshTrigger }: ExpensesListProps) => {
   };
 
   const getTotalReceived = () => {
-    return filteredExpenses
-      .filter(expense => expense.transactionType === 'received' || expense.transactionType === 'total_received')
-      .reduce((sum, expense) => sum + expense.amount, 0);
+    return filteredExpenses.reduce((sum, expense) => sum + expense.credit, 0);
   };
 
   const getTotalSpent = () => {
-    return filteredExpenses
-      .filter(expense => expense.transactionType === 'spent')
-      .reduce((sum, expense) => sum + expense.amount, 0);
+    return filteredExpenses.reduce((sum, expense) => sum + expense.debit, 0);
   };
 
   const getBalance = () => {
     return getTotalReceived() - getTotalSpent();
+  };
+
+  const formatAmount = (amount: number) => {
+    return amount === 0 ? '' : amount.toFixed(2);
   };
 
   return (
@@ -149,57 +181,69 @@ const ExpensesList = ({ type, refreshTrigger }: ExpensesListProps) => {
       </div>
 
       {/* Table */}
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Category</TableHead>
-              {type === 'project' && <TableHead>Project</TableHead>}
-              <TableHead>Type</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Payment Method</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredExpenses.map((expense) => (
-              <TableRow key={expense.id}>
-                <TableCell>{new Date(expense.date).toLocaleDateString()}</TableCell>
-                <TableCell className="max-w-xs truncate">{expense.description}</TableCell>
-                <TableCell>{expense.category}</TableCell>
-                {type === 'project' && <TableCell>{expense.projectName || '-'}</TableCell>}
-                <TableCell>
-                  <Badge variant={expense.transactionType === 'spent' ? 'destructive' : 'default'}>
-                    {expense.transactionType === 'received' ? 'Received' : 
-                     expense.transactionType === 'total_received' ? 'Total Received' : 'Spent'}
-                  </Badge>
-                </TableCell>
-                <TableCell className={expense.transactionType === 'spent' ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
-                  {expense.transactionType === 'spent' ? '-' : '+'}₹{expense.amount.toLocaleString()}
-                </TableCell>
-                <TableCell>{expense.paymentMethod}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => deleteExpense(expense.id)}
-                    className="text-red-600 hover:text-red-800"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </TableCell>
+      <div className="border rounded-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-gray-50">
+                <TableHead className="font-bold border-r min-w-[100px]">Date</TableHead>
+                <TableHead className="font-bold border-r min-w-[150px]">Description</TableHead>
+                <TableHead className="font-bold border-r min-w-[120px]">Category</TableHead>
+                {type === 'project' && <TableHead className="font-bold border-r min-w-[120px]">Project/Others</TableHead>}
+                <TableHead className="font-bold border-r min-w-[100px]">Type</TableHead>
+                <TableHead className="font-bold border-r min-w-[120px]">Payment Method</TableHead>
+                <TableHead className="font-bold border-r text-center min-w-[100px]">Debit</TableHead>
+                <TableHead className="font-bold border-r text-center min-w-[100px]">Credit</TableHead>
+                <TableHead className="font-bold border-r text-center min-w-[100px]">Balance</TableHead>
+                <TableHead className="font-bold text-center min-w-[80px]">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        
-        {filteredExpenses.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground">
-            No expenses found matching your criteria.
-          </div>
-        )}
+            </TableHeader>
+            <TableBody>
+              {filteredExpenses.map((expense) => (
+                <TableRow key={expense.id}>
+                  <TableCell className="border-r">{new Date(expense.date).toLocaleDateString()}</TableCell>
+                  <TableCell className="border-r max-w-xs truncate">{expense.description}</TableCell>
+                  <TableCell className="border-r">{expense.category}</TableCell>
+                  {type === 'project' && <TableCell className="border-r">{expense.projectName || 'Others'}</TableCell>}
+                  <TableCell className="border-r">
+                    <Badge variant={expense.transactionType === 'spent' ? 'destructive' : 'default'}>
+                      {expense.transactionType === 'received' ? 'Received' : 
+                       expense.transactionType === 'total_received' ? 'Total Received' : 'Spent'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="border-r">{expense.paymentMethod}</TableCell>
+                  <TableCell className="border-r text-right text-red-600">
+                    {formatAmount(expense.debit)}
+                  </TableCell>
+                  <TableCell className="border-r text-right text-green-600">
+                    {formatAmount(expense.credit)}
+                  </TableCell>
+                  <TableCell className={`border-r text-right font-semibold ${
+                    expense.balance < 0 ? 'text-red-600' : expense.balance > 0 ? 'text-green-600' : 'text-gray-600'
+                  }`}>
+                    {expense.balance.toFixed(2)}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteExpense(expense.id)}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          
+          {filteredExpenses.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              No expenses found matching your criteria.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
