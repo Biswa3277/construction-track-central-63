@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Download, Upload, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from 'xlsx';
@@ -143,72 +142,44 @@ const ExcelImportExport = ({ onDataChange }: ExcelImportExportProps) => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileSpreadsheet className="h-5 w-5" />
-          Excel Import/Export
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Button 
-            onClick={exportToExcel} 
-            disabled={isExporting}
-            variant="outline"
-            className="flex-1"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            {isExporting ? "Exporting..." : "Export to Excel"}
-          </Button>
-          
-          <Button 
-            onClick={downloadTemplate}
-            variant="outline"
-            className="flex-1"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Download Template
-          </Button>
-        </div>
+    <div className="flex gap-2">
+      <Button 
+        onClick={exportToExcel} 
+        disabled={isExporting}
+        variant="outline"
+        size="sm"
+      >
+        <Download className="mr-2 h-4 w-4" />
+        {isExporting ? "Exporting..." : "Export"}
+      </Button>
+      
+      <Button 
+        onClick={downloadTemplate}
+        variant="outline"
+        size="sm"
+      >
+        <FileSpreadsheet className="mr-2 h-4 w-4" />
+        Template
+      </Button>
 
-        <div className="space-y-2">
-          <label htmlFor="excel-import" className="text-sm font-medium">
-            Import from Excel:
-          </label>
-          <div className="flex items-center gap-2">
-            <Input
-              id="excel-import"
-              type="file"
-              accept=".xlsx,.xls"
-              onChange={importFromExcel}
-              disabled={isImporting}
-              className="flex-1"
-            />
-            <Button 
-              variant="ghost" 
-              size="sm"
-              disabled={isImporting}
-            >
-              <Upload className="h-4 w-4" />
-            </Button>
-          </div>
-          {isImporting && (
-            <p className="text-sm text-muted-foreground">
-              Importing expenses...
-            </p>
-          )}
-        </div>
-
-        <div className="text-xs text-muted-foreground">
-          <p>• The Excel file should contain columns: Date, Type, Category, Project, Description, Amount, Transaction Type, Payment Method, Person Name, Bill Available</p>
-          <p>• Use the template for proper formatting</p>
-          <p>• Type should be 'project' or 'other'</p>
-          <p>• Transaction Type should be 'received' or 'spent'</p>
-          <p>• Bill Available should be 'Yes' or 'No'</p>
-        </div>
-      </CardContent>
-    </Card>
+      <div className="relative">
+        <Input
+          type="file"
+          accept=".xlsx,.xls"
+          onChange={importFromExcel}
+          disabled={isImporting}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        />
+        <Button 
+          variant="outline" 
+          size="sm"
+          disabled={isImporting}
+        >
+          <Upload className="mr-2 h-4 w-4" />
+          {isImporting ? "Importing..." : "Import"}
+        </Button>
+      </div>
+    </div>
   );
 };
 
