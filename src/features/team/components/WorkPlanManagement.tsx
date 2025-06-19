@@ -5,9 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Calendar, MapPin, Clock } from "lucide-react";
+import { Plus, Search, MapPin } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WorkPlan, WorkPlanPeriod, WorkPlanStatus } from "../types/teamTypes";
 import AddWorkPlanForm from "./AddWorkPlanForm";
 
@@ -151,16 +150,6 @@ const WorkPlanManagement = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Tabs value={selectedStatus === "all" ? "all" : selectedStatus} onValueChange={(value) => setSelectedStatus(value as WorkPlanStatus | "all")} className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="all">All Plans</TabsTrigger>
-              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-              <TabsTrigger value="current">Current</TabsTrigger>
-              <TabsTrigger value="completed">Completed</TabsTrigger>
-              <TabsTrigger value="overdue">Overdue</TabsTrigger>
-            </TabsList>
-          </Tabs>
-
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
