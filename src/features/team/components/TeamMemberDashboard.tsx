@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Plus, MapPin, Clock, CheckCircle, Calendar as CalendarIcon, Save, Edit, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, MapPin, Clock, CheckCircle, Calendar as CalendarIcon, Save, Edit, Trash2, Eye } from "lucide-react";
 import { TeamMember } from "../types/teamTypes";
 import { toast } from "sonner";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, differenceInDays } from "date-fns";
@@ -27,17 +28,17 @@ interface WorkPlan {
   location: string;
   status: 'planned' | 'completed' | 'leave';
   priority: 'low' | 'medium' | 'high';
-  startTime?: string;
-  endTime?: string;
 }
 
 interface TodoItem {
   id: string;
-  title: string;
+  name: string;
   description: string;
   progress: number;
   priority: 'low' | 'medium' | 'high';
-  dueDate: string;
+  targetDate: string;
+  createdDate: string;
+  remarks: string;
   status: 'pending' | 'in-progress' | 'completed';
 }
 
@@ -51,7 +52,9 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
   const [workPlans, setWorkPlans] = useState<WorkPlan[]>([]);
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [isAddTodoOpen, setIsAddTodoOpen] = useState(false);
+  const [isTodoDetailsOpen, setIsTodoDetailsOpen] = useState(false);
   const [selectedWorkPlan, setSelectedWorkPlan] = useState<WorkPlan | null>(null);
+  const [selectedTodo, setSelectedTodo] = useState<TodoItem | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [workPlanForm, setWorkPlanForm] = useState({
@@ -62,10 +65,11 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
     status: 'planned' as 'planned' | 'completed' | 'leave'
   });
   const [newTodo, setNewTodo] = useState({
-    title: '',
+    name: '',
     description: '',
     priority: 'medium' as 'low' | 'medium' | 'high',
-    dueDate: null as Date | null
+    targetDate: null as Date | null,
+    remarks: ''
   });
 
   useEffect(() => {
@@ -202,9 +206,7 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
       description: workPlanForm.description,
       location: workPlanForm.location,
       status: workPlanForm.status,
-      priority: workPlanForm.priority,
-      startTime: workPlanForm.startTime,
-      endTime: workPlanForm.endTime
+      priority: workPlanForm.priority
     };
 
     let updatedWorkPlans;
@@ -249,15 +251,20 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
   };
 
   const handleAddTodo = () => {
-    if (!newTodo.title || !newTodo.dueDate) return;
+    if (!newTodo.name || !newTodo.targetDate) {
+      toast.error("Please fill in required fields");
+      return;
+    }
 
     const todo: TodoItem = {
       id: Date.now().toString(),
-      title: newTodo.title,
+      name: newTodo.name,
       description: newTodo.description,
       progress: 0,
       priority: newTodo.priority,
-      dueDate: newTodo.dueDate.toISOString().split('T')[0],
+      targetDate: newTodo.targetDate.toISOString().split('T')[0],
+      createdDate: new Date().toISOString().split('T')[0],
+      remarks: newTodo.remarks,
       status: 'pending'
     };
 
@@ -265,7 +272,7 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
     setTodos(updatedTodos);
     localStorage.setItem(`todos_${member.id}`, JSON.stringify(updatedTodos));
 
-    setNewTodo({ title: '', description: '', priority: 'medium', dueDate: null });
+    setNewTodo({ name: '', description: '', priority: 'medium', targetDate: null, remarks: '' });
     setIsAddTodoOpen(false);
     toast.success("Task added successfully!");
   };
@@ -295,6 +302,29 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
     localStorage.setItem(`todos_${member.id}`, JSON.stringify(updatedTodos));
   };
 
+  const handleDeleteTodo = (todoId: string) => {
+    if (window.confirm("Are you sure you want to delete this task?")) {
+      const updatedTodos = todos.filter(t => t.id !== todoId);
+      setTodos(updatedTodos);
+      localStorage.setItem(`todos_${member.id}`, JSON.stringify(updatedTodos));
+      toast.success("Task deleted successfully!");
+    }
+  };
+
+  const handleViewTodo = (todo: TodoItem) => {
+    setSelectedTodo(todo);
+    setIsTodoDetailsOpen(true);
+  };
+
+  const updateTodoStatus = (todoId: string, newStatus: string) => {
+    const updatedTodos = todos.map(t => 
+      t.id === todoId ? { ...t, status: newStatus as 'pending' | 'in-progress' | 'completed', progress: newStatus === 'completed' ? 100 : t.progress } : t
+    );
+    setTodos(updatedTodos);
+    localStorage.setItem(`todos_${member.id}`, JSON.stringify(updatedTodos));
+    toast.success("Task status updated!");
+  };
+
   const getPriorityBadge = (priority: string) => {
     const colors = {
       low: "bg-gray-100 text-gray-800",
@@ -308,9 +338,11 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
     const colors = {
       planned: "bg-blue-100 text-blue-800",
       completed: "bg-green-100 text-green-800",
-      leave: "bg-gray-100 text-gray-800"
+      leave: "bg-gray-100 text-gray-800",
+      pending: "bg-yellow-100 text-yellow-800",
+      'in-progress': "bg-blue-100 text-blue-800"
     };
-    return <Badge className={colors[status as keyof typeof colors]}>{status.toUpperCase()}</Badge>;
+    return <Badge className={colors[status as keyof typeof colors]}>{status.toUpperCase().replace('-', ' ')}</Badge>;
   };
 
   const getMonthWorkPlans = () => {
@@ -322,6 +354,10 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
       const planEnd = new Date(wp.endDate);
       return planStart <= monthEnd && planEnd >= monthStart;
     });
+  };
+
+  const isOverdue = (targetDate: string, status: string) => {
+    return new Date(targetDate) < new Date() && status !== 'completed';
   };
 
   return (
@@ -742,47 +778,97 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
             </div>
 
             <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  {todos.map((todo) => (
-                    <div key={todo.id} className="p-4 border rounded-lg space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h5 className="font-medium">{todo.title}</h5>
-                        {getPriorityBadge(todo.priority)}
-                      </div>
-                      
-                      <p className="text-sm text-muted-foreground">{todo.description}</p>
-                      
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm">Progress</span>
-                          <span className="text-sm font-medium">{todo.progress}%</span>
-                        </div>
-                        <Progress value={todo.progress} className="h-2" />
-                        
-                        <div className="flex items-center gap-2">
-                          <Input
-                            type="number"
-                            min="0"
-                            max="100"
-                            value={todo.progress}
-                            onChange={(e) => updateTodoProgress(todo.id, parseInt(e.target.value) || 0)}
-                            className="w-20"
-                          />
-                          <span className="text-sm text-muted-foreground">
-                            Due: {new Date(todo.dueDate).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-
-                  {todos.length === 0 && (
-                    <p className="text-center text-muted-foreground py-8">
-                      No tasks yet. Add your first task to get started.
-                    </p>
-                  )}
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Things To Do List</CardTitle>
+                  <CardDescription>Manage your parallel tasks and deadlines</CardDescription>
                 </div>
+              </CardHeader>
+              <CardContent>
+                {todos.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground mb-4">No tasks found. Add your first task to get started.</p>
+                    <Button onClick={() => setIsAddTodoOpen(true)}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Task
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Task Name</TableHead>
+                          <TableHead>Priority</TableHead>
+                          <TableHead>Progress</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Target Date</TableHead>
+                          <TableHead>Created</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {todos.map((todo) => (
+                          <TableRow key={todo.id} className={isOverdue(todo.targetDate, todo.status) ? "bg-red-50" : ""}>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium">{todo.name}</div>
+                                <div className="text-sm text-muted-foreground truncate max-w-[200px]">
+                                  {todo.description}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>{getPriorityBadge(todo.priority)}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Progress value={todo.progress} className="h-2 w-20" />
+                                <span className="text-xs">{todo.progress}%</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-col gap-1">
+                                {getStatusBadge(todo.status)}
+                                {isOverdue(todo.targetDate, todo.status) && (
+                                  <Badge variant="destructive" className="text-xs">Overdue</Badge>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>{new Date(todo.targetDate).toLocaleDateString()}</TableCell>
+                            <TableCell>{new Date(todo.createdDate).toLocaleDateString()}</TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleViewTodo(todo)}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                {todo.status !== 'completed' && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => updateTodoStatus(todo.id, 'completed')}
+                                    className="text-green-600"
+                                  >
+                                    ✓
+                                  </Button>
+                                )}
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleDeleteTodo(todo.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -791,18 +877,18 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
 
       {/* Add Todo Dialog */}
       <Dialog open={isAddTodoOpen} onOpenChange={setIsAddTodoOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add New Task</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="todo-title">Title *</Label>
+              <Label htmlFor="todo-name">Task Name *</Label>
               <Input
-                id="todo-title"
-                value={newTodo.title}
-                onChange={(e) => setNewTodo({ ...newTodo, title: e.target.value })}
-                placeholder="Enter task title"
+                id="todo-name"
+                value={newTodo.name}
+                onChange={(e) => setNewTodo({ ...newTodo, name: e.target.value })}
+                placeholder="Enter task name"
               />
             </div>
             
@@ -831,11 +917,21 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
             </div>
             
             <div>
-              <Label htmlFor="todo-due-date">Due Date *</Label>
+              <Label htmlFor="todo-target-date">Target Date *</Label>
               <DatePicker
-                date={newTodo.dueDate}
-                setDate={(date) => setNewTodo({ ...newTodo, dueDate: date })}
-                placeholder="Select due date"
+                date={newTodo.targetDate}
+                setDate={(date) => setNewTodo({ ...newTodo, targetDate: date })}
+                placeholder="Select target date"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="todo-remarks">Remarks</Label>
+              <Textarea
+                id="todo-remarks"
+                value={newTodo.remarks}
+                onChange={(e) => setNewTodo({ ...newTodo, remarks: e.target.value })}
+                placeholder="Additional remarks"
               />
             </div>
             
@@ -848,6 +944,84 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Todo Details Dialog */}
+      <Dialog open={isTodoDetailsOpen} onOpenChange={setIsTodoDetailsOpen}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Task Details</DialogTitle>
+          </DialogHeader>
+          {selectedTodo && (
+            <div className="space-y-4">
+              <div>
+                <Label>Task Name</Label>
+                <div className="p-2 bg-gray-50 rounded">{selectedTodo.name}</div>
+              </div>
+              
+              <div>
+                <Label>Description</Label>
+                <div className="p-2 bg-gray-50 rounded">{selectedTodo.description || 'No description'}</div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Priority</Label>
+                  <div className="p-2">{getPriorityBadge(selectedTodo.priority)}</div>
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <div className="p-2">{getStatusBadge(selectedTodo.status)}</div>
+                </div>
+              </div>
+              
+              <div>
+                <Label>Progress</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Progress</span>
+                    <span className="text-sm font-medium">{selectedTodo.progress}%</span>
+                  </div>
+                  <Progress value={selectedTodo.progress} className="h-2" />
+                  
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={selectedTodo.progress}
+                      onChange={(e) => updateTodoProgress(selectedTodo.id, parseInt(e.target.value) || 0)}
+                      className="w-20"
+                    />
+                    <span className="text-sm text-muted-foreground">%</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Target Date</Label>
+                  <div className="p-2 bg-gray-50 rounded">{new Date(selectedTodo.targetDate).toLocaleDateString()}</div>
+                </div>
+                <div>
+                  <Label>Created Date</Label>
+                  <div className="p-2 bg-gray-50 rounded">{new Date(selectedTodo.createdDate).toLocaleDateString()}</div>
+                </div>
+              </div>
+              
+              <div>
+                <Label>Remarks</Label>
+                <div className="p-2 bg-gray-50 rounded">{selectedTodo.remarks || 'No remarks'}</div>
+              </div>
+              
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => setIsTodoDetailsOpen(false)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
