@@ -24,14 +24,16 @@ const SelectContext = createContext<SelectContextType>({})
 
 interface SelectProps {
   value?: string
+  defaultValue?: string
   onValueChange?: (value: string) => void
   children: React.ReactNode
 }
 
-export const Select = ({ value, onValueChange, children }: SelectProps) => {
+export const Select = ({ value, defaultValue, onValueChange, children }: SelectProps) => {
+  const currentValue = value || defaultValue
   return (
-    <SelectContext.Provider value={{ value, onValueChange }}>
-      <SelectRoot value={value ? [value] : []} onValueChange={(e) => onValueChange?.(e.value[0])}>
+    <SelectContext.Provider value={{ value: currentValue, onValueChange }}>
+      <SelectRoot value={currentValue ? [currentValue] : []} onValueChange={(e) => onValueChange?.(e.value[0])}>
         {children}
       </SelectRoot>
     </SelectContext.Provider>
