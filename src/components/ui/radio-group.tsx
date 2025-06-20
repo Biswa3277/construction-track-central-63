@@ -1,7 +1,6 @@
 
 import * as React from "react"
-import { RadioGroup as ChakraRadioGroup, Radio as ChakraRadio } from "@chakra-ui/react"
-import { Circle } from "lucide-react"
+import { RadioGroup as ChakraRadioGroupRoot, RadioGroupItem as ChakraRadioGroupItem } from "@chakra-ui/react"
 import { cn } from "@/lib/utils"
 
 const RadioGroup = React.forwardRef<
@@ -13,10 +12,10 @@ const RadioGroup = React.forwardRef<
   }
 >(({ className, value, onValueChange, ...props }, ref) => {
   return (
-    <ChakraRadioGroup
+    <ChakraRadioGroupRoot
       ref={ref}
       value={value}
-      onChange={onValueChange}
+      onValueChange={(e) => onValueChange?.(e.value)}
       className={cn("grid gap-2", className)}
       {...props}
     />
@@ -32,7 +31,7 @@ const RadioGroupItem = React.forwardRef<
   }
 >(({ className, value, ...props }, ref) => {
   return (
-    <ChakraRadio
+    <ChakraRadioGroupItem
       ref={ref}
       value={value}
       className={cn(
