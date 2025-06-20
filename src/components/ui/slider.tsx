@@ -1,6 +1,6 @@
 
 import * as React from "react"
-import { Slider as ChakraSlider, SliderTrack, SliderFilledTrack, SliderThumb } from "@chakra-ui/react"
+import { Slider as ChakraSlider, SliderTrack, SliderThumb, SliderFilledTrack } from "@chakra-ui/react"
 import { cn } from "@/lib/utils"
 
 const Slider = React.forwardRef<
@@ -13,11 +13,14 @@ const Slider = React.forwardRef<
     step?: number
     className?: string
   }
->(({ className, value, onValueChange, ...props }, ref) => (
+>(({ className, value, onValueChange, max = 100, min = 0, step = 1, ...props }, ref) => (
   <ChakraSlider
     ref={ref}
-    value={value}
-    onValueChange={onValueChange}
+    value={value?.[0] || 0}
+    onChange={(val) => onValueChange?.([val])}
+    max={max}
+    min={min}
+    step={step}
     className={cn(
       "relative flex w-full touch-none select-none items-center",
       className
@@ -27,7 +30,10 @@ const Slider = React.forwardRef<
     <SliderTrack className="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary">
       <SliderFilledTrack className="absolute h-full bg-primary" />
     </SliderTrack>
-    <SliderThumb className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" />
+    <SliderThumb 
+      index={0}
+      className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" 
+    />
   </ChakraSlider>
 ))
 Slider.displayName = "Slider"

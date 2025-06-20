@@ -1,14 +1,20 @@
 
 import * as React from "react"
-import { Avatar as ChakraAvatar, AvatarBadge, AvatarGroup } from "@chakra-ui/react"
+import { Avatar as ChakraAvatar } from "@chakra-ui/react"
 import { cn } from "@/lib/utils"
 
 const Avatar = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & { className?: string }
->(({ className, ...props }, ref) => (
+  React.HTMLAttributes<HTMLDivElement> & { 
+    className?: string
+    src?: string
+    name?: string
+  }
+>(({ className, src, name, ...props }, ref) => (
   <ChakraAvatar
     ref={ref}
+    src={src}
+    name={name}
     className={cn(
       "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full",
       className
