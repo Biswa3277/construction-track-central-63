@@ -1,14 +1,12 @@
 
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  useDisclosure,
-  ModalProps,
+  DialogRoot,
+  DialogBackdrop,
+  DialogContent as ChakraDialogContent,
+  DialogHeader as ChakraDialogHeader,
+  DialogFooter as ChakraDialogFooter,
+  DialogBody,
+  DialogCloseTrigger,
 } from "@chakra-ui/react"
 import { X } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -30,20 +28,15 @@ interface DialogProps {
 export const Dialog = ({ open = false, onOpenChange, children }: DialogProps) => {
   return (
     <DialogContext.Provider value={{ open, onOpenChange: onOpenChange || (() => {}) }}>
-      <Modal isOpen={open} onClose={() => onOpenChange?.(false)}>
+      <DialogRoot open={open} onOpenChange={(e) => onOpenChange?.(e.open)}>
         {children}
-      </Modal>
+      </DialogRoot>
     </DialogContext.Provider>
   )
 }
 
 export const DialogTrigger = ({ children }: { children: React.ReactNode }) => {
-  const context = useContext(DialogContext)
-  return (
-    <div onClick={() => context?.onOpenChange?.(true)}>
-      {children}
-    </div>
-  )
+  return <>{children}</>
 }
 
 export const DialogContent = forwardRef<
@@ -51,8 +44,8 @@ export const DialogContent = forwardRef<
   React.HTMLAttributes<HTMLDivElement> & { className?: string }
 >(({ className, children, ...props }, ref) => (
   <>
-    <ModalOverlay />
-    <ModalContent
+    <DialogBackdrop />
+    <ChakraDialogContent
       ref={ref}
       className={cn(
         "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg",
@@ -61,10 +54,10 @@ export const DialogContent = forwardRef<
       {...props}
     >
       {children}
-      <ModalCloseButton>
+      <DialogCloseTrigger>
         <X className="h-4 w-4" />
-      </ModalCloseButton>
-    </ModalContent>
+      </DialogCloseTrigger>
+    </ChakraDialogContent>
   </>
 ))
 DialogContent.displayName = "DialogContent"
@@ -73,7 +66,7 @@ export const DialogHeader = ({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
-  <ModalHeader
+  <ChakraDialogHeader
     className={cn(
       "flex flex-col space-y-1.5 text-center sm:text-left",
       className
@@ -87,7 +80,7 @@ export const DialogFooter = ({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
-  <ModalFooter
+  <ChakraDialogFooter
     className={cn(
       "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
       className

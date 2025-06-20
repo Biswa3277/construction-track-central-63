@@ -1,9 +1,9 @@
 
-import { FormLabel, FormLabelProps } from "@chakra-ui/react"
+import { Text } from "@chakra-ui/react"
 import { cn } from "@/lib/utils"
 import { forwardRef } from "react"
 
-export interface LabelProps extends Omit<FormLabelProps, 'children'> {
+export interface LabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
   className?: string
   children?: React.ReactNode
   htmlFor?: string
@@ -11,7 +11,7 @@ export interface LabelProps extends Omit<FormLabelProps, 'children'> {
 
 export const Label = forwardRef<HTMLLabelElement, LabelProps>(
   ({ className, children, htmlFor, ...props }, ref) => (
-    <FormLabel
+    <label
       ref={ref}
       htmlFor={htmlFor}
       className={cn(
@@ -21,7 +21,7 @@ export const Label = forwardRef<HTMLLabelElement, LabelProps>(
       {...props}
     >
       {children}
-    </FormLabel>
+    </label>
   )
 )
 Label.displayName = "Label"

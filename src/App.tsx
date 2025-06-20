@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import LoginPage from "./features/auth/components/LoginPage";
 import DashboardLayout from "./features/dashboard/components/DashboardLayout";
 import ProtectedRoute from "./features/auth/components/ProtectedRoute";
+import AppLayout from "./components/layout/AppLayout";
 import "./App.css";
 
 function App() {
@@ -18,7 +19,7 @@ function App() {
               path="/*"
               element={
                 <ProtectedRoute>
-                  <DashboardLayout />
+                  <AppLayout />
                 </ProtectedRoute>
               }
             />
