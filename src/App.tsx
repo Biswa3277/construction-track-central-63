@@ -1,70 +1,34 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import MainLayout from "@/features/layout/components/MainLayout";
-import LoginPage from "@/features/auth/components/LoginPage";
-import Dashboard from "@/pages/Dashboard";
-import Projects from "@/pages/Projects";
-import ProjectDetailPage from "@/pages/ProjectDetailPage";
-import DepartmentProjects from "@/pages/DepartmentProjects";
-import Payments from "@/pages/Payments";
-import ProjectBilling from "@/pages/ProjectBilling";
-import PurchaseBilling from "@/pages/PurchaseBilling";
-import Transportation from "@/pages/Transportation";
-import Vendors from "@/pages/Vendors";
-import Expenses from "@/pages/Expenses";
-import Billing from "@/pages/Billing";
-import ReportsPage from "@/features/reports/pages/ReportsPage";
-import Settings from "@/pages/Settings";
-import UserManagementPage from "@/features/users/pages/UserManagementPage";
-import PaymentDetailView from "@/features/payments/components/PaymentDetailView";
-import TeamManagement from "@/pages/TeamManagement";
-import TeamMemberDashboardPage from "@/pages/TeamMemberDashboard";
-import ThingsToDo from "@/pages/ThingsToDo";
-import NotFound from "@/pages/NotFound";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { ChakraProvider } from "./chakra/ChakraProvider";
+import { Toaster } from "sonner";
+import LoginPage from "./features/auth/components/LoginPage";
+import DashboardLayout from "./features/dashboard/components/DashboardLayout";
+import ProtectedRoute from "./features/auth/components/ProtectedRoute";
+import "./App.css";
 
-const queryClient = new QueryClient();
-
-const App = () => {
+function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+    <ChakraProvider>
+      <Router>
+        <div className="min-h-screen bg-background">
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/*"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/" element={<MainLayout />}>
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route path="projects" element={<Projects />} />
-              <Route path="project/:id" element={<ProjectDetailPage />} />
-              <Route path="project-dashboard" element={<Navigate to="/dashboard" replace />} />
-              <Route path="department-projects" element={<DepartmentProjects />} />
-              <Route path="things-to-do" element={<ThingsToDo />} />
-              <Route path="payments" element={<Payments />} />
-              <Route path="payments/:id" element={<PaymentDetailView />} />
-              <Route path="project-billing" element={<ProjectBilling />} />
-              <Route path="purchase-billing" element={<PurchaseBilling />} />
-              <Route path="transportation" element={<Transportation />} />
-              <Route path="vendors" element={<Vendors />} />
-              <Route path="expenses" element={<Expenses />} />
-              <Route path="billing" element={<Billing />} />
-              <Route path="team-management" element={<TeamManagement />} />
-              <Route path="team-member/:memberId" element={<TeamMemberDashboardPage />} />
-              <Route path="reports" element={<ReportsPage />} />
-              <Route path="settings" element={<Settings />} />
-              <Route path="user-management" element={<UserManagementPage />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+          <Toaster />
+        </div>
+      </Router>
+    </ChakraProvider>
   );
-};
+}
 
 export default App;
