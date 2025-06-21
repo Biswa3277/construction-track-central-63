@@ -4,17 +4,13 @@ import { Avatar as ChakraAvatarRoot, AvatarImage as ChakraAvatarImage, AvatarFal
 import { cn } from "@/lib/utils"
 
 const Avatar = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & { 
+  React.ElementRef<typeof ChakraAvatarRoot>,
+  React.ComponentPropsWithoutRef<typeof ChakraAvatarRoot> & { 
     className?: string
-    src?: string
-    name?: string
   }
->(({ className, src, name, ...props }, ref) => (
+>(({ className, ...props }, ref) => (
   <ChakraAvatarRoot
     ref={ref}
-    src={src}
-    name={name}
     className={cn(
       "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full",
       className
@@ -25,8 +21,8 @@ const Avatar = React.forwardRef<
 Avatar.displayName = "Avatar"
 
 const AvatarImage = React.forwardRef<
-  HTMLImageElement,
-  React.ImgHTMLAttributes<HTMLImageElement> & { className?: string }
+  React.ElementRef<typeof ChakraAvatarImage>,
+  React.ComponentPropsWithoutRef<typeof ChakraAvatarImage> & { className?: string }
 >(({ className, ...props }, ref) => (
   <ChakraAvatarImage
     ref={ref}
@@ -37,8 +33,8 @@ const AvatarImage = React.forwardRef<
 AvatarImage.displayName = "AvatarImage"
 
 const AvatarFallback = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & { className?: string }
+  React.ElementRef<typeof ChakraAvatarFallback>,
+  React.ComponentPropsWithoutRef<typeof ChakraAvatarFallback> & { className?: string }
 >(({ className, ...props }, ref) => (
   <ChakraAvatarFallback
     ref={ref}

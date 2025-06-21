@@ -5,8 +5,8 @@ import { Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const Checkbox = React.forwardRef<
-  HTMLInputElement,
-  React.InputHTMLAttributes<HTMLInputElement> & { 
+  React.ElementRef<typeof ChakraCheckboxRoot>,
+  React.ComponentPropsWithoutRef<typeof ChakraCheckboxRoot> & { 
     className?: string
     onCheckedChange?: (checked: boolean) => void
   }

@@ -4,8 +4,8 @@ import { Switch as ChakraSwitchRoot, SwitchControl, SwitchThumb } from "@chakra-
 import { cn } from "@/lib/utils"
 
 const Switch = React.forwardRef<
-  HTMLInputElement,
-  React.InputHTMLAttributes<HTMLInputElement> & { 
+  React.ElementRef<typeof ChakraSwitchRoot>,
+  React.ComponentPropsWithoutRef<typeof ChakraSwitchRoot> & { 
     className?: string
     onCheckedChange?: (checked: boolean) => void
   }

@@ -4,8 +4,8 @@ import { RadioGroup as ChakraRadioGroupRoot, RadioGroupItem as ChakraRadioGroupI
 import { cn } from "@/lib/utils"
 
 const RadioGroup = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & {
+  React.ElementRef<typeof ChakraRadioGroupRoot>,
+  React.ComponentPropsWithoutRef<typeof ChakraRadioGroupRoot> & {
     value?: string
     onValueChange?: (value: string) => void
     className?: string
@@ -24,8 +24,8 @@ const RadioGroup = React.forwardRef<
 RadioGroup.displayName = "RadioGroup"
 
 const RadioGroupItem = React.forwardRef<
-  HTMLInputElement,
-  React.InputHTMLAttributes<HTMLInputElement> & {
+  React.ElementRef<typeof ChakraRadioGroupItem>,
+  React.ComponentPropsWithoutRef<typeof ChakraRadioGroupItem> & {
     value: string
     className?: string
   }

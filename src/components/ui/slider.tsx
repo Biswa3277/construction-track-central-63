@@ -4,8 +4,8 @@ import { Slider as ChakraSliderRoot, SliderTrack, SliderThumb, SliderRange } fro
 import { cn } from "@/lib/utils"
 
 const Slider = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & {
+  React.ElementRef<typeof ChakraSliderRoot>,
+  React.ComponentPropsWithoutRef<typeof ChakraSliderRoot> & {
     value?: number[]
     onValueChange?: (value: number[]) => void
     max?: number

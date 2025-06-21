@@ -106,7 +106,7 @@ export const reducer = (state: State, action: Action): State => {
           t.id === toastId || toastId === undefined
             ? {
                 ...t,
-                open: false,
+                variant: t.variant || "default",
               }
             : t
         ),
@@ -154,7 +154,7 @@ function toast({ ...props }: Toast) {
     toast: {
       ...props,
       id,
-      open: true,
+      variant: props.variant || "default",
       onOpenChange: (open) => {
         if (!open) dismiss()
       },
