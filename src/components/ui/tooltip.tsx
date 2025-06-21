@@ -1,7 +1,7 @@
 
 import * as React from "react"
 import { 
-  Tooltip as ChakraTooltipRoot,
+  Tooltip as ChakraTooltip,
   TooltipContent as ChakraTooltipContent,
   TooltipTrigger as ChakraTooltipTrigger
 } from "@chakra-ui/react"
@@ -11,13 +11,17 @@ const TooltipProvider = ({ children }: { children: React.ReactNode }) => (
   <>{children}</>
 )
 
-const Tooltip = ChakraTooltipRoot
+const Tooltip = ({ children, ...props }: { children: React.ReactNode } & any) => (
+  <ChakraTooltip {...props}>
+    {children}
+  </ChakraTooltip>
+)
 
 const TooltipTrigger = ChakraTooltipTrigger
 
 const TooltipContent = React.forwardRef<
-  React.ElementRef<typeof ChakraTooltipContent>,
-  React.ComponentPropsWithoutRef<typeof ChakraTooltipContent> & {
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & {
     sideOffset?: number
     className?: string
   }
