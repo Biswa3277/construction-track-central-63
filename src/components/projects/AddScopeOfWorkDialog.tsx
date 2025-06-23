@@ -62,7 +62,7 @@ const AddScopeOfWorkDialog = ({ project, onSuccess }: AddScopeOfWorkDialogProps)
           value={formData.title}
           onChange={(e) => setFormData({...formData, title: e.target.value})}
           placeholder="Enter scope title"
-          required
+          isRequired
         />
       </div>
 
@@ -88,7 +88,7 @@ const AddScopeOfWorkDialog = ({ project, onSuccess }: AddScopeOfWorkDialogProps)
           onChange={(e) => setFormData({...formData, description: e.target.value})}
           placeholder="Describe this scope of work..."
           rows={3}
-          required
+          isRequired
         />
       </div>
 

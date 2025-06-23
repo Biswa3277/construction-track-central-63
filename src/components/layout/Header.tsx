@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Search, Bell, Mail, User, Settings, LogOut, Moon, Sun } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -99,7 +100,7 @@ const Header = ({ user }: HeaderProps) => {
 
       {/* Notifications */}
       <Popover>
-        <PopoverTrigger asChild>
+        <PopoverTrigger>
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />
             {unreadNotifications > 0 && (
@@ -135,7 +136,7 @@ const Header = ({ user }: HeaderProps) => {
 
       {/* Messages */}
       <Popover>
-        <PopoverTrigger asChild>
+        <PopoverTrigger>
           <Button variant="ghost" size="icon" className="relative">
             <Mail className="h-5 w-5" />
             {unreadMessages > 0 && (
@@ -176,7 +177,7 @@ const Header = ({ user }: HeaderProps) => {
 
       {/* User Account */}
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger>
           <Button variant="ghost" className="flex items-center gap-2 px-2">
             <Avatar className="h-8 w-8">
               <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>

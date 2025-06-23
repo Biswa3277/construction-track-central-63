@@ -15,7 +15,7 @@ const RadioGroupComponent = React.forwardRef<
     <ChakraRadioGroup
       ref={ref}
       value={value}
-      onChange={onValueChange}
+      onChange={(nextValue: string) => onValueChange?.(nextValue)}
       className={cn("grid gap-2", className)}
       {...props}
     />
@@ -35,9 +35,10 @@ const RadioGroupItem = React.forwardRef<
       ref={ref}
       value={value}
       className={cn(
-        "aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+        "aspect-square rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
+      size="md"
       {...props}
     />
   )

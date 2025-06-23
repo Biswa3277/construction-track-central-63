@@ -1,12 +1,11 @@
 
 import { 
   Table as ChakraTable, 
-  TableRoot,
-  TableHeader as ChakraTableHeader,
-  TableBody as ChakraTableBody,
-  TableRow as ChakraTableRow,
-  TableColumnHeader,
-  TableCell as ChakraTableCell,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
 } from "@chakra-ui/react"
 import { cn } from "@/lib/utils"
 import { forwardRef } from "react"
@@ -16,7 +15,7 @@ export const Table = forwardRef<
   React.HTMLAttributes<HTMLTableElement> & { className?: string }
 >(({ className, ...props }, ref) => (
   <div className="relative w-full overflow-auto">
-    <TableRoot
+    <ChakraTable
       ref={ref}
       className={cn("w-full caption-bottom text-sm", className)}
       {...props}
@@ -29,7 +28,7 @@ export const TableHeader = forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <ChakraTableHeader ref={ref} className={cn("[&_tr]:border-b", className)} {...props} />
+  <Thead ref={ref} className={cn("[&_tr]:border-b", className)} {...props} />
 ))
 TableHeader.displayName = "TableHeader"
 
@@ -37,7 +36,7 @@ export const TableBody = forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <ChakraTableBody
+  <Tbody
     ref={ref}
     className={cn("[&_tr:last-child]:border-0", className)}
     {...props}
@@ -64,7 +63,7 @@ export const TableRow = forwardRef<
   HTMLTableRowElement,
   React.HTMLAttributes<HTMLTableRowElement>
 >(({ className, ...props }, ref) => (
-  <ChakraTableRow
+  <Tr
     ref={ref}
     className={cn(
       "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
@@ -79,7 +78,7 @@ export const TableHead = forwardRef<
   HTMLTableCellElement,
   React.ThHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => (
-  <TableColumnHeader
+  <Th
     ref={ref}
     className={cn(
       "h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0",
@@ -94,7 +93,7 @@ export const TableCell = forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => (
-  <ChakraTableCell
+  <Td
     ref={ref}
     className={cn("p-4 align-middle [&:has([role=checkbox])]:pr-0", className)}
     {...props}

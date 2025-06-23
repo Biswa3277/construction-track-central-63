@@ -1,7 +1,6 @@
 
 import { 
-  Select as ChakraSelect,
-  option as ChakraOption
+  Select as ChakraSelect
 } from "@chakra-ui/react"
 import { cn } from "@/lib/utils"
 import { forwardRef, createContext, useContext } from "react"
@@ -75,8 +74,8 @@ export const SelectContent = forwardRef<
 SelectContent.displayName = "SelectContent"
 
 export const SelectItem = forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & { value: string; className?: string }
+  HTMLOptionElement,
+  React.OptionHTMLAttributes<HTMLOptionElement> & { value: string; className?: string }
 >(({ className, children, value, ...props }, ref) => (
   <option
     ref={ref}

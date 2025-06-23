@@ -2,11 +2,11 @@
 import * as React from "react"
 import {
   AlertDialog as ChakraAlertDialog,
-  AlertDialogOverlay as ChakraAlertDialogOverlay,
-  AlertDialogContent as ChakraAlertDialogContent,
-  AlertDialogHeader as ChakraAlertDialogHeader,
+  AlertDialogOverlay,
+  AlertDialogContent,
+  AlertDialogHeader,
   AlertDialogBody,
-  AlertDialogFooter as ChakraAlertDialogFooter,
+  AlertDialogFooter,
   Button,
   useDisclosure
 } from "@chakra-ui/react"
@@ -30,8 +30,7 @@ const AlertDialogOverlay = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & { className?: string }
 >(({ className, ...props }, ref) => (
-  <ChakraAlertDialogOverlay
-    ref={ref}
+  <AlertDialogOverlay
     className={cn(
       "fixed inset-0 z-50 bg-black/80",
       className
@@ -45,7 +44,7 @@ const AlertDialogContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & { className?: string }
 >(({ className, ...props }, ref) => (
-  <ChakraAlertDialogContent
+  <AlertDialogContent
     ref={ref}
     className={cn(
       "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg",
@@ -60,7 +59,7 @@ const AlertDialogHeader = ({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
-  <ChakraAlertDialogHeader
+  <AlertDialogHeader
     className={cn(
       "flex flex-col space-y-2 text-center sm:text-left",
       className
@@ -74,7 +73,7 @@ const AlertDialogFooter = ({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
-  <ChakraAlertDialogFooter
+  <AlertDialogFooter
     className={cn(
       "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
       className

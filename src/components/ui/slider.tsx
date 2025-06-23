@@ -22,7 +22,7 @@ const SliderComponent = React.forwardRef<
   <ChakraSlider
     ref={ref}
     value={value?.[0] || 0}
-    onChange={(val) => onValueChange?.([val])}
+    onChange={(val: number) => onValueChange?.([val])}
     max={max}
     min={min}
     step={step}
