@@ -1,7 +1,6 @@
 
 import * as React from "react"
 import { Checkbox as ChakraCheckbox } from "@chakra-ui/react"
-import { Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const CheckboxComponent = React.forwardRef<

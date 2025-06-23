@@ -1,6 +1,6 @@
 
 import * as React from "react"
-import { Avatar as ChakraAvatar, AvatarBadge, AvatarGroup } from "@chakra-ui/react"
+import { Avatar as ChakraAvatar } from "@chakra-ui/react"
 import { cn } from "@/lib/utils"
 
 const AvatarComponent = React.forwardRef<
