@@ -1,6 +1,6 @@
 
 import * as React from "react"
-import { Avatar } from "@chakra-ui/react"
+import { Avatar as ChakraAvatar, AvatarBadge, AvatarGroup } from "@chakra-ui/react"
 import { cn } from "@/lib/utils"
 
 const AvatarComponent = React.forwardRef<
@@ -11,18 +11,18 @@ const AvatarComponent = React.forwardRef<
     name?: string
   }
 >(({ className, src, name, children, ...props }, ref) => (
-  <Avatar.Root
+  <ChakraAvatar
     ref={ref}
     className={cn(
       "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full",
       className
     )}
+    src={src}
+    name={name}
     {...props}
   >
-    {src && <Avatar.Image src={src} />}
-    {name && <Avatar.Fallback>{name.charAt(0)}</Avatar.Fallback>}
     {children}
-  </Avatar.Root>
+  </ChakraAvatar>
 ))
 AvatarComponent.displayName = "Avatar"
 
@@ -30,7 +30,7 @@ const AvatarImage = React.forwardRef<
   HTMLImageElement,
   React.ImgHTMLAttributes<HTMLImageElement> & { className?: string }
 >(({ className, ...props }, ref) => (
-  <Avatar.Image
+  <img
     ref={ref}
     className={cn("aspect-square h-full w-full", className)}
     {...props}
@@ -42,7 +42,7 @@ const AvatarFallback = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & { className?: string }
 >(({ className, ...props }, ref) => (
-  <Avatar.Fallback
+  <div
     ref={ref}
     className={cn(
       "flex h-full w-full items-center justify-center rounded-full bg-muted",

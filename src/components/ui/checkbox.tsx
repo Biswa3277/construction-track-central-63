@@ -1,6 +1,6 @@
 
 import * as React from "react"
-import { Checkbox } from "@chakra-ui/react"
+import { Checkbox as ChakraCheckbox } from "@chakra-ui/react"
 import { Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -12,20 +12,16 @@ const CheckboxComponent = React.forwardRef<
     checked?: boolean
   }
 >(({ className, onCheckedChange, checked, ...props }, ref) => (
-  <Checkbox.Root
+  <ChakraCheckbox
     ref={ref}
     className={cn(
       "peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
       className
     )}
-    checked={checked}
-    onCheckedChange={onCheckedChange}
+    isChecked={checked}
+    onChange={(e) => onCheckedChange?.(e.target.checked)}
     {...props}
-  >
-    <Checkbox.Indicator>
-      <Check className="h-4 w-4" />
-    </Checkbox.Indicator>
-  </Checkbox.Root>
+  />
 ))
 CheckboxComponent.displayName = "Checkbox"
 

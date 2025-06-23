@@ -1,6 +1,11 @@
 
 import * as React from "react"
-import { Slider } from "@chakra-ui/react"
+import { 
+  Slider as ChakraSlider,
+  SliderTrack,
+  SliderFilledTrack,
+  SliderThumb
+} from "@chakra-ui/react"
 import { cn } from "@/lib/utils"
 
 const SliderComponent = React.forwardRef<
@@ -14,10 +19,10 @@ const SliderComponent = React.forwardRef<
     className?: string
   }
 >(({ className, value, onValueChange, max = 100, min = 0, step = 1, ...props }, ref) => (
-  <Slider.Root
+  <ChakraSlider
     ref={ref}
-    value={value}
-    onValueChange={onValueChange}
+    value={value?.[0] || 0}
+    onChange={(val) => onValueChange?.([val])}
     max={max}
     min={min}
     step={step}
@@ -27,11 +32,11 @@ const SliderComponent = React.forwardRef<
     )}
     {...props}
   >
-    <Slider.Track>
-      <Slider.Range />
-    </Slider.Track>
-    <Slider.Thumb />
-  </Slider.Root>
+    <SliderTrack>
+      <SliderFilledTrack />
+    </SliderTrack>
+    <SliderThumb />
+  </ChakraSlider>
 ))
 SliderComponent.displayName = "Slider"
 

@@ -1,6 +1,6 @@
 
 import * as React from "react"
-import { RadioGroup } from "@chakra-ui/react"
+import { RadioGroup as ChakraRadioGroup, Radio as ChakraRadio } from "@chakra-ui/react"
 import { cn } from "@/lib/utils"
 
 const RadioGroupComponent = React.forwardRef<
@@ -12,10 +12,10 @@ const RadioGroupComponent = React.forwardRef<
   }
 >(({ className, value, onValueChange, ...props }, ref) => {
   return (
-    <RadioGroup.Root
+    <ChakraRadioGroup
       ref={ref}
       value={value}
-      onValueChange={onValueChange}
+      onChange={onValueChange}
       className={cn("grid gap-2", className)}
       {...props}
     />
@@ -31,7 +31,7 @@ const RadioGroupItem = React.forwardRef<
   }
 >(({ className, value, ...props }, ref) => {
   return (
-    <RadioGroup.Item
+    <ChakraRadio
       ref={ref}
       value={value}
       className={cn(
@@ -39,9 +39,7 @@ const RadioGroupItem = React.forwardRef<
         className
       )}
       {...props}
-    >
-      <RadioGroup.ItemIndicator />
-    </RadioGroup.Item>
+    />
   )
 })
 RadioGroupItem.displayName = "RadioGroupItem"
