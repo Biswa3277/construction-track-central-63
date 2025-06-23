@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,7 +61,7 @@ const AddScopeOfWorkDialog = ({ project, onSuccess }: AddScopeOfWorkDialogProps)
           value={formData.title}
           onChange={(e) => setFormData({...formData, title: e.target.value})}
           placeholder="Enter scope title"
-          isRequired
+          required
         />
       </div>
 
@@ -88,7 +87,7 @@ const AddScopeOfWorkDialog = ({ project, onSuccess }: AddScopeOfWorkDialogProps)
           onChange={(e) => setFormData({...formData, description: e.target.value})}
           placeholder="Describe this scope of work..."
           rows={3}
-          isRequired
+          required
         />
       </div>
 

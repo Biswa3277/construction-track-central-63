@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -426,7 +425,8 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
                         'selected': { backgroundColor: '#3b82f6', color: '#ffffff' }
                       }}
                       components={{
-                        Day: ({ date, ...props }) => {
+                        Day: ({ day, ...props }) => {
+                          const date = day.date;
                           const workPlan = getDateWorkPlan(date);
                           const isSelected = selectedDates.some(d => d.toDateString() === date.toDateString());
                           const status = getDateStatus(date);
@@ -466,7 +466,7 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
                           if (workPlan) {
                             return (
                               <Tooltip>
-                                <TooltipTrigger asChild>
+                                <TooltipTrigger>
                                   {dayElement}
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -556,7 +556,7 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
                           value={workPlanForm.description}
                           onChange={(e) => setWorkPlanForm({ ...workPlanForm, description: e.target.value })}
                           placeholder="Describe the work plan"
-                          disabled={!isEditing}
+                          isDisabled={!isEditing}
                         />
                       </div>
 
@@ -598,7 +598,7 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
                           <Select 
                             value={workPlanForm.priority} 
                             onValueChange={(value: 'low' | 'medium' | 'high') => setWorkPlanForm({ ...workPlanForm, priority: value })}
-                            disabled={!isEditing}
+                            isDisabled={!isEditing}
                           >
                             <SelectTrigger>
                               <SelectValue />
@@ -615,7 +615,7 @@ const TeamMemberDashboard = ({ member, onBack }: TeamMemberDashboardProps) => {
                           <Select 
                             value={workPlanForm.status} 
                             onValueChange={(value: 'planned' | 'completed' | 'leave') => setWorkPlanForm({ ...workPlanForm, status: value })}
-                            disabled={!isEditing}
+                            isDisabled={!isEditing}
                           >
                             <SelectTrigger>
                               <SelectValue />

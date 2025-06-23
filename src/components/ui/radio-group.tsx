@@ -15,7 +15,7 @@ const RadioGroupComponent = React.forwardRef<
     <ChakraRadioGroup
       ref={ref}
       value={value}
-      onChange={(nextValue: string) => onValueChange?.(nextValue)}
+      onChange={onValueChange}
       className={cn("grid gap-2", className)}
       {...props}
     />
