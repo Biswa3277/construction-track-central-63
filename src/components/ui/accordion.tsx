@@ -1,16 +1,16 @@
 
 import * as React from "react"
 import { 
-  AccordionRoot,
+  Accordion as ChakraAccordion,
   AccordionItem as ChakraAccordionItem,
-  AccordionItemTrigger,
-  AccordionItemContent,
-  AccordionItemIndicator
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
+  Box
 } from "@chakra-ui/react"
-import { ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-const Accordion = AccordionRoot
+const Accordion = ChakraAccordion
 
 const AccordionItem = React.forwardRef<
   HTMLDivElement,
@@ -28,19 +28,19 @@ const AccordionTrigger = React.forwardRef<
   HTMLButtonElement,
   React.ButtonHTMLAttributes<HTMLButtonElement> & { className?: string }
 >(({ className, children, ...props }, ref) => (
-  <AccordionItemTrigger
+  <AccordionButton
     ref={ref}
     className={cn(
-      "flex flex-1 items-center justify-between py-4 font-medium transition-all hover:underline [&[data-state=open]>svg]:rotate-180",
+      "flex flex-1 items-center justify-between py-4 font-medium transition-all hover:underline",
       className
     )}
     {...props}
   >
-    {children}
-    <AccordionItemIndicator>
-      <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
-    </AccordionItemIndicator>
-  </AccordionItemTrigger>
+    <Box flex="1" textAlign="left">
+      {children}
+    </Box>
+    <AccordionIcon />
+  </AccordionButton>
 ))
 AccordionTrigger.displayName = "AccordionTrigger"
 
@@ -48,13 +48,13 @@ const AccordionContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & { className?: string }
 >(({ className, children, ...props }, ref) => (
-  <AccordionItemContent
+  <AccordionPanel
     ref={ref}
-    className="overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
+    className={cn("pb-4 pt-0", className)}
     {...props}
   >
-    <div className={cn("pb-4 pt-0", className)}>{children}</div>
-  </AccordionItemContent>
+    {children}
+  </AccordionPanel>
 ))
 AccordionContent.displayName = "AccordionContent"
 

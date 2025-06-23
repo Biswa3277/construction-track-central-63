@@ -3,7 +3,34 @@ import * as React from "react"
 import { Tabs as ChakraTabs, TabList, TabPanels, TabPanel, Tab } from "@chakra-ui/react"
 import { cn } from "@/lib/utils"
 
-const Tabs = ChakraTabs
+interface TabsProps {
+  value?: string
+  defaultValue?: string
+  onValueChange?: (value: string) => void
+  children: React.ReactNode
+  className?: string
+}
+
+const Tabs = ({ value, defaultValue, onValueChange, children, className, ...props }: TabsProps) => {
+  const [activeIndex, setActiveIndex] = React.useState(0)
+  
+  const handleTabsChange = (index: number) => {
+    setActiveIndex(index)
+    // This would need to be mapped to actual tab values
+    onValueChange?.(`tab-${index}`)
+  }
+
+  return (
+    <ChakraTabs 
+      index={activeIndex} 
+      onChange={handleTabsChange}
+      className={className}
+      {...props}
+    >
+      {children}
+    </ChakraTabs>
+  )
+}
 
 const TabsList = React.forwardRef<
   HTMLDivElement,

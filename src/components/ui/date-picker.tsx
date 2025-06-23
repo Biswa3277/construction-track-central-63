@@ -22,7 +22,7 @@ interface DatePickerProps {
 export function DatePicker({ date, setDate, placeholder = "Pick a date", className, disabled }: DatePickerProps) {
   return (
     <Popover>
-      <PopoverTrigger asChild>
+      <PopoverTrigger>
         <Button
           variant={"outline"}
           className={cn(

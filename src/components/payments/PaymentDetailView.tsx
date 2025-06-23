@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +11,7 @@ import { toast } from "sonner";
 
 const PaymentDetailView = () => {
   const { id } = useParams();
-  const [activeTab, setActiveTab] = useState("details");
+  const [activeTab, setActiveTab] = useState(0);
   
   // This would typically come from an API
   const payment = {
@@ -103,14 +102,14 @@ const PaymentDetailView = () => {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs defaultValue="details" onValueChange={(value) => setActiveTab(parseInt(value.split('-')[1]))} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="details">Payment Details</TabsTrigger>
-          <TabsTrigger value="transportation">Transportation</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsTrigger>Payment Details</TabsTrigger>
+          <TabsTrigger>Transportation</TabsTrigger>
+          <TabsTrigger>Documents</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="details" className="space-y-4">
+        <TabsContent className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Payment Information</CardTitle>
@@ -203,7 +202,7 @@ const PaymentDetailView = () => {
           </Card>
         </TabsContent>
         
-        <TabsContent value="transportation" className="space-y-4">
+        <TabsContent className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Transportation Details</CardTitle>
@@ -251,7 +250,7 @@ const PaymentDetailView = () => {
           </Card>
         </TabsContent>
         
-        <TabsContent value="documents" className="space-y-4">
+        <TabsContent className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Documents</CardTitle>

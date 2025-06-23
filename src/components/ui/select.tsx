@@ -1,12 +1,7 @@
 
 import { 
-  SelectRoot,
-  SelectTrigger as ChakraSelectTrigger,
-  SelectValueText,
-  SelectContent as ChakraSelectContent,
-  SelectItem as ChakraSelectItem,
-  SelectItemText,
-  createListCollection
+  Select as ChakraSelect,
+  option as ChakraOption
 } from "@chakra-ui/react"
 import { cn } from "@/lib/utils"
 import { forwardRef, createContext, useContext } from "react"
@@ -28,17 +23,15 @@ interface SelectProps {
 
 export const Select = ({ value, defaultValue, onValueChange, children }: SelectProps) => {
   const currentValue = value || defaultValue
-  const collection = createListCollection({ items: [] })
   
   return (
     <SelectContext.Provider value={{ value: currentValue, onValueChange }}>
-      <SelectRoot 
-        collection={collection}
-        value={currentValue ? [currentValue] : []} 
-        onValueChange={(e) => onValueChange?.(e.value[0])}
+      <ChakraSelect 
+        value={currentValue} 
+        onChange={(e) => onValueChange?.(e.target.value)}
       >
         {children}
-      </SelectRoot>
+      </ChakraSelect>
     </SelectContext.Provider>
   )
 }
@@ -48,38 +41,36 @@ export const SelectTrigger = forwardRef<
   React.ButtonHTMLAttributes<HTMLButtonElement> & { className?: string }
 >(({ className, children, ...props }, ref) => {
   return (
-    <ChakraSelectTrigger
-      ref={ref}
+    <div
       className={cn(
-        "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+        "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
-      {...props}
     >
       {children}
-    </ChakraSelectTrigger>
+    </div>
   )
 })
 SelectTrigger.displayName = "SelectTrigger"
 
 export const SelectValue = ({ placeholder }: { placeholder?: string }) => (
-  <SelectValueText placeholder={placeholder} />
+  <span>{placeholder}</span>
 )
 
 export const SelectContent = forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & { className?: string }
 >(({ className, children, ...props }, ref) => (
-  <ChakraSelectContent
+  <div
     ref={ref}
     className={cn(
-      "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+      "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md",
       className
     )}
     {...props}
   >
     {children}
-  </ChakraSelectContent>
+  </div>
 ))
 SelectContent.displayName = "SelectContent"
 
@@ -87,16 +78,16 @@ export const SelectItem = forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & { value: string; className?: string }
 >(({ className, children, value, ...props }, ref) => (
-  <ChakraSelectItem
+  <option
     ref={ref}
-    item={value}
+    value={value}
     className={cn(
-      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground",
       className
     )}
     {...props}
   >
-    <SelectItemText>{children}</SelectItemText>
-  </ChakraSelectItem>
+    {children}
+  </option>
 ))
 SelectItem.displayName = "SelectItem"

@@ -1,5 +1,5 @@
 
-import { ProgressRoot, ProgressValueText } from "@chakra-ui/react"
+import { Progress as ChakraProgress } from "@chakra-ui/react"
 import { cn } from "@/lib/utils"
 import { forwardRef } from "react"
 
@@ -11,7 +11,7 @@ interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const Progress = forwardRef<HTMLDivElement, ProgressProps>(
   ({ className, value, indicatorClassName, ...props }, ref) => (
-    <ProgressRoot
+    <ChakraProgress
       ref={ref}
       className={cn(
         "relative h-4 w-full overflow-hidden rounded-full bg-secondary",
